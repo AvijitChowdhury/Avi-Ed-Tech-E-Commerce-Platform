@@ -46,6 +46,8 @@ function AdminOrders() {
   const restoreFn = useServerFn(restoreOrders);
   const deleteFn = useServerFn(deleteOrdersPermanently);
   const createFn = useServerFn(createManualOrder);
+  const shipFn = useServerFn(shipOrdersToSteadfast);
+  const syncFn = useServerFn(syncSteadfastStatuses);
 
   const load = () =>
     supabase
