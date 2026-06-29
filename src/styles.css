@@ -249,8 +249,8 @@
 }
 
 @utility card-glass {
-  background: oklch(0.21 0.022 160 / 0.55);
-  border: 1px solid oklch(0.50 0.025 150 / 0.20);
+  background: color-mix(in oklab, var(--color-card) 70%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-border) 100%, transparent);
   backdrop-filter: blur(20px) saturate(140%);
   box-shadow: var(--shadow-soft);
 }
