@@ -1,21 +1,47 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Check, Download } from "lucide-react";
+import { Check, Download, AlertCircle } from "lucide-react";
 import { money } from "@/lib/format";
+import { useServerFn } from "@tanstack/react-start";
+import { createPaymentCharge } from "@/lib/payment.functions";
+import { toast } from "sonner";
 
-export const Route = createFileRoute("/_public/order-confirmation/$id")({ component: ConfirmPage });
+export const Route = createFileRoute("/_public/order-confirmation/$id")({
+  component: ConfirmPage,
+  validateSearch: (s: Record<string, unknown>) => ({ payment: (s.payment as string | undefined) ?? undefined }),
+});
 
 function ConfirmPage() {
   const { id } = Route.useParams();
+  const { payment } = useSearch({ from: "/_public/order-confirmation/$id" });
   const [order, setOrder] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [retrying, setRetrying] = useState(false);
+  const createChargeFn = useServerFn(createPaymentCharge);
 
   useEffect(() => {
     supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setOrder(data));
     supabase.from("order_items").select("*").eq("order_id", id).then(({ data }) => setItems((data as any) ?? []));
   }, [id]);
+
+  const retry = async () => {
+    if (!order) return;
+    setRetrying(true);
+    try {
+      const partial = order.payment_method === "PARTIAL";
+      const amount = partial ? Number(order.shipping) : Number(order.total) - Number(order.paid_amount || 0);
+      const r = await createChargeFn({
+        data: { order_id: order.id, amount, full_name: order.customer_name, email: order.customer_email, origin: window.location.origin, partial },
+      });
+      window.location.href = r.payment_url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to start payment");
+      setRetrying(false);
+    }
+  };
+
 
   const downloadInvoice = async () => {
     if (!order) return;
