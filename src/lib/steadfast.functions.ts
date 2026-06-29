@@ -114,7 +114,7 @@ export const syncSteadfastStatuses = createServerFn({ method: "POST" })
 
 export async function runSteadfastSync() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: orders } = await supabaseAdmin
+  const { data: orders } = await (supabaseAdmin as any)
     .from("orders")
     .select("id, order_number, steadfast_consignment_id, steadfast_status, status")
     .not("steadfast_consignment_id", "is", null)
