@@ -16,6 +16,7 @@ import { money } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
+import { fbTrack } from "@/lib/fbpixel";
 
 export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
 

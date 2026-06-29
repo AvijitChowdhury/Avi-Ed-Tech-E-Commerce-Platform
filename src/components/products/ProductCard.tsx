@@ -4,6 +4,7 @@ import { money } from "@/lib/format";
 import { useCart } from "@/stores/cart";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { fbTrack } from "@/lib/fbpixel";
 
 export type ProductLike = {
   id: string;
@@ -79,6 +80,14 @@ export default function ProductCard({ p }: { p: ProductLike }) {
             className="gradient-primary-bg text-primary-foreground hover:opacity-90 hover:scale-105 transition-transform font-semibold"
             onClick={() => {
               add({ product_id: p.id, slug: p.slug, title: p.title, price, image: p.cover_image ?? null });
+              fbTrack("AddToCart", {
+                content_ids: [p.id],
+                content_name: p.title,
+                content_type: "product",
+                contents: [{ id: p.id, quantity: 1, item_price: price }],
+                value: price,
+                currency: "USD",
+              });
               toast.success("Added to cart");
             }}
           >
