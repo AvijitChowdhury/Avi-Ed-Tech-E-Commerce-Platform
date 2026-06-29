@@ -16,6 +16,7 @@ import { money } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
+import { fbTrack } from "@/lib/fbpixel";
 
 export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
 
@@ -89,6 +90,13 @@ function CheckoutPage() {
   const submit = async () => {
     if (!items.length) return;
     setSubmitting(true);
+    fbTrack("InitiateCheckout", {
+      content_ids: items.map((i) => i.product_id),
+      contents: items.map((i) => ({ id: i.product_id, quantity: i.qty, item_price: i.price })),
+      num_items: items.reduce((s, i) => s + i.qty, 0),
+      value: total,
+      currency: "USD",
+    });
     try {
       const r = await placeOrderFn({
         data: {

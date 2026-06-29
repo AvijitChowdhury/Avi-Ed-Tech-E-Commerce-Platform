@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Download, AlertCircle } from "lucide-react";
 import { money } from "@/lib/format";
 import { useServerFn } from "@tanstack/react-start";
 import { createPaymentCharge } from "@/lib/payment.functions";
 import { getOrderForConfirmation } from "@/lib/checkout.functions";
+import { fbCapiEvent } from "@/lib/fbcapi.functions";
+import { fbTrack } from "@/lib/fbpixel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_public/order-confirmation/$id")({
@@ -21,6 +23,8 @@ function ConfirmPage() {
   const [retrying, setRetrying] = useState(false);
   const createChargeFn = useServerFn(createPaymentCharge);
   const fetchOrder = useServerFn(getOrderForConfirmation);
+  const sendCapi = useServerFn(fbCapiEvent);
+  const purchaseFiredRef = useRef(false);
 
   useEffect(() => {
     fetchOrder({ data: { id } }).then((r) => {
@@ -28,6 +32,47 @@ function ConfirmPage() {
       setItems(r.items);
     });
   }, [id]);
+
+  // Fire Purchase (browser pixel + Conversions API) once we have the order
+  // and payment is not in a failed state.
+  useEffect(() => {
+    if (!order || purchaseFiredRef.current) return;
+    const paid = order.payment_status === "paid" || order.payment_status === "partial_paid";
+    const cod = order.payment_method === "COD";
+    if (!paid && !cod) return;
+    purchaseFiredRef.current = true;
+    const eventId = `purchase_${order.id}`;
+    const contents = (items || []).map((it: any) => ({
+      id: it.product_id ?? it.id,
+      quantity: it.qty,
+      item_price: Number(it.price),
+    }));
+    const value = Number(order.total);
+    fbTrack("Purchase", {
+      value,
+      currency: "USD",
+      contents,
+      content_ids: contents.map((c) => c.id),
+      content_type: "product",
+      order_id: order.order_number,
+    });
+    sendCapi({
+      data: {
+        event_name: "Purchase",
+        event_id: eventId,
+        event_source_url: typeof window !== "undefined" ? window.location.href : undefined,
+        email: order.customer_email,
+        phone: order.customer_phone,
+        value,
+        currency: "USD",
+        contents,
+        content_ids: contents.map((c) => c.id),
+        content_type: "product",
+        order_id: order.order_number,
+      },
+    }).catch(() => {});
+  }, [order, items, sendCapi]);
+
 
   const retry = async () => {
     if (!order) return;
