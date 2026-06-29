@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Check, Download, AlertCircle } from "lucide-react";
 import { money } from "@/lib/format";
 import { useServerFn } from "@tanstack/react-start";
 import { createPaymentCharge } from "@/lib/payment.functions";
+import { getOrderForConfirmation } from "@/lib/checkout.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_public/order-confirmation/$id")({
@@ -20,10 +20,13 @@ function ConfirmPage() {
   const [items, setItems] = useState<any[]>([]);
   const [retrying, setRetrying] = useState(false);
   const createChargeFn = useServerFn(createPaymentCharge);
+  const fetchOrder = useServerFn(getOrderForConfirmation);
 
   useEffect(() => {
-    supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setOrder(data));
-    supabase.from("order_items").select("*").eq("order_id", id).then(({ data }) => setItems((data as any) ?? []));
+    fetchOrder({ data: { id } }).then((r) => {
+      setOrder(r.order);
+      setItems(r.items);
+    });
   }, [id]);
 
   const retry = async () => {
