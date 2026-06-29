@@ -15,6 +15,7 @@ import { CartProvider } from "../stores/cart";
 import { AuthProvider } from "../stores/auth";
 import { Toaster } from "../components/ui/sonner";
 import { supabase } from "../integrations/supabase/client";
+import { FB_PIXEL_ID, fbTrack, initFbAutoTrackers } from "../lib/fbpixel";
 
 function NotFoundComponent() {
   return (
@@ -105,11 +106,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   // Inline script: read saved theme (or system pref) before paint to avoid FOUC.
   const themeBootstrap = `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');}document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.classList.add('dark');}})();`;
+  const fbPixel = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${FB_PIXEL_ID}');fbq('track','PageView');`;
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+        <script dangerouslySetInnerHTML={{ __html: fbPixel }} />
+        <noscript
+          dangerouslySetInnerHTML={{
+            __html: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1" />`,
+          }}
+        />
       </head>
       <body>
         {children}
@@ -132,6 +140,17 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Fire PageView on client-side route changes (initial PageView is in head).
+  useEffect(() => {
+    initFbAutoTrackers();
+    let firstHandled = false;
+    const unsub = router.subscribe("onResolved", () => {
+      if (!firstHandled) { firstHandled = true; return; }
+      fbTrack("PageView");
+    });
+    return () => unsub();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
