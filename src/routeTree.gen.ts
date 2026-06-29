@@ -37,6 +37,7 @@ import { Route as AuthenticatedAccountWishlistRouteImport } from './routes/_auth
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account.profile'
 import { Route as AuthenticatedAccountOrdersRouteImport } from './routes/_authenticated/account.orders'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
+import { Route as ApiPublicPaymentCallbackRouteImport } from './routes/api/public/payment.callback'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -189,6 +190,12 @@ const AuthenticatedAccountAddressesRoute =
     path: '/addresses',
     getParentRoute: () => AuthenticatedAccountRoute,
   } as any)
+const ApiPublicPaymentCallbackRoute =
+  ApiPublicPaymentCallbackRouteImport.update({
+    id: '/api/public/payment/callback',
+    path: '/api/public/payment/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -217,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -243,6 +251,7 @@ export interface FileRoutesByTo {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -274,6 +283,7 @@ export interface FileRoutesById {
   '/_public/products/$slug': typeof PublicProductsSlugRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account/'
     | '/admin/'
+    | '/api/public/payment/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account'
     | '/admin'
+    | '/api/public/payment/callback'
   id:
     | '__root__'
     | '/_authenticated'
@@ -360,12 +372,14 @@ export interface FileRouteTypes {
     | '/_public/products/$slug'
     | '/_authenticated/account/'
     | '/_authenticated/admin/'
+    | '/api/public/payment/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicPaymentCallbackRoute: typeof ApiPublicPaymentCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -566,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountAddressesRouteImport
       parentRoute: typeof AuthenticatedAccountRoute
     }
+    '/api/public/payment/callback': {
+      id: '/api/public/payment/callback'
+      path: '/api/public/payment/callback'
+      fullPath: '/api/public/payment/callback'
+      preLoaderRoute: typeof ApiPublicPaymentCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -669,6 +690,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicPaymentCallbackRoute: ApiPublicPaymentCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
