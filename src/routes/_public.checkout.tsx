@@ -14,9 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { money } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
-import { Check } from "lucide-react";
+import { Check, ShieldAlert, ShieldCheck, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { fbTrack } from "@/lib/fbpixel";
+import { checkFraud, saveOrderFraud } from "@/lib/fraud.functions";
+import { getCached, setCached, normalizePhone } from "@/lib/fraudCache";
 
 export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
 
@@ -29,10 +31,36 @@ function CheckoutPage() {
   const placeOrderFn = useServerFn(placeOrder);
   const upsertFn = useServerFn(upsertIncompleteOrder);
   const createChargeFn = useServerFn(createPaymentCharge);
+  const fraudFn = useServerFn(checkFraud);
+  const saveFraudFn = useServerFn(saveOrderFraud);
   const [step, setStep] = useState(0);
   const [zones, setZones] = useState<Zone[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE" | "PARTIAL">("COD");
+  const [fraud, setFraud] = useState<any | null>(null);
+  const [fraudLoading, setFraudLoading] = useState(false);
+  const [fraudAck, setFraudAck] = useState(false);
+  const [autoCheckOn, setAutoCheckOn] = useState(true);
+
+  useEffect(() => {
+    supabase.from("app_settings").select("value").eq("key", "fraud").maybeSingle()
+      .then(({ data }) => { if (data?.value && (data.value as any).auto_check === false) setAutoCheckOn(false); });
+  }, []);
+
+  const runFraudCheck = async (phone: string) => {
+    const p = normalizePhone(phone);
+    if (!p || p.length < 6) return;
+    const cached = getCached(p);
+    if (cached) { setFraud({ ...cached, cached: true }); return; }
+    setFraudLoading(true);
+    try {
+      const r: any = await fraudFn({ data: { phone: p } });
+      setFraud(r);
+      setCached(p, r);
+    } catch (e: any) {
+      // silent fail; don't block checkout
+    } finally { setFraudLoading(false); }
+  };
 
   const [form, setForm] = useState({
     customer_name: "",
