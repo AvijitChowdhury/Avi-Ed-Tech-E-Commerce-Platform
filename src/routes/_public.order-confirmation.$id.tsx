@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, Download, AlertCircle } from "lucide-react";
 import { money } from "@/lib/format";
 import { useServerFn } from "@tanstack/react-start";
 import { createPaymentCharge } from "@/lib/payment.functions";
 import { getOrderForConfirmation } from "@/lib/checkout.functions";
+import { fbCapiEvent } from "@/lib/fbcapi.functions";
+import { fbTrack } from "@/lib/fbpixel";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_public/order-confirmation/$id")({
