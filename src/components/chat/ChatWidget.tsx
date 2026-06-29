@@ -73,10 +73,10 @@ export default function ChatWidget() {
   };
 
   const startChat = async () => {
-    if (!name.trim() || !email.trim()) return;
+    if (!user || !name.trim() || !email.trim()) return;
     const { data, error } = await supabase
       .from("chat_sessions")
-      .insert({ guest_name: name.trim(), guest_email: email.trim(), user_id: user?.id ?? null })
+      .insert({ guest_name: name.trim(), guest_email: email.trim(), user_id: user.id })
       .select("id")
       .single();
     if (error || !data) return;
