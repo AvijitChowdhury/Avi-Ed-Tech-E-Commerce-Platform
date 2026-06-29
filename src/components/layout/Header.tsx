@@ -9,6 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -73,6 +74,7 @@ export default function Header() {
         </form>
 
         <div className="flex items-center gap-1 md:ml-2 ml-auto">
+          <ThemeToggle />
           <Link to="/cart" className="relative">
             <Button variant="ghost" size="icon" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
