@@ -129,7 +129,7 @@ function AdminProducts() {
     const slug = slugify(name);
     if (!slug) return;
     const { data, error } = await supabase.from("tags").insert({ name: name.trim(), slug }).select("id, name, slug").single();
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setTags((t) => [...t, data as any]);
     setProductTagIds((ids) => [...ids, (data as any).id]);
   };
