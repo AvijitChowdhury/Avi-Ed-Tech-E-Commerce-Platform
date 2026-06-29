@@ -115,6 +115,16 @@ function CheckoutPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [form, items, subtotal, shipping, total, user?.id, upsertFn]);
 
+  // Auto fraud check when phone is filled and user reaches review step
+  useEffect(() => {
+    if (!autoCheckOn) return;
+    if (step !== 2) return;
+    if (!form.customer_phone) return;
+    if (fraud && normalizePhone(form.customer_phone) === normalizePhone(fraud.phone || "")) return;
+    runFraudCheck(form.customer_phone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, form.customer_phone, autoCheckOn]);
+
   const submit = async () => {
     if (!items.length) return;
     setSubmitting(true);
