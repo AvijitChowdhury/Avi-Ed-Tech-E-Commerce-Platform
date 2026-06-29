@@ -142,6 +142,8 @@ function CheckoutPage() {
           payment_method: paymentMethod,
         },
       });
+      // persist the fraud snapshot onto the order (best-effort)
+      saveFraudFn({ data: { order_id: r.id, phone: form.customer_phone } }).catch(() => {});
       clear();
 
       if (paymentMethod === "ONLINE" || paymentMethod === "PARTIAL") {
