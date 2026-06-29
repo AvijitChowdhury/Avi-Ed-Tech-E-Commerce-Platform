@@ -99,7 +99,7 @@ export const shipOrdersToSteadfast = createServerFn({ method: "POST" })
         steadfast_synced_at: new Date().toISOString(),
         status: "shipped",
       };
-      await supabaseAdmin.from("orders").update(upd).eq("id", order.id);
+      await supabaseAdmin.from("orders").update(upd as any).eq("id", order.id);
       created++;
     }
     return { created, skipped: orders.length - toShip.length, errors };
