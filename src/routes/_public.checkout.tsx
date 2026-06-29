@@ -103,6 +103,7 @@ function CheckoutPage() {
           zone_id: form.zone_id,
           cart: items.map((i) => ({ product_id: i.product_id, title: i.title, price: i.price, qty: i.qty, image: i.image })),
           notes: form.notes || null,
+          payment_method: paymentMethod,
         },
       });
       clear();
