@@ -248,6 +248,38 @@ function CheckoutPage() {
               <div><span className="text-muted-foreground">Address:</span> {form.line1}, {form.city}</div>
               <div><span className="text-muted-foreground">Zone:</span> {zone?.name}</div>
 
+              {autoCheckOn && (
+                <div className={`rounded-xl border p-3 flex items-start gap-3 ${
+                  fraudLoading ? "border-border bg-muted/30" :
+                  fraud?.risk === "high" ? "border-destructive/50 bg-destructive/10" :
+                  fraud?.risk === "medium" ? "border-yellow-500/40 bg-yellow-500/10" :
+                  fraud?.risk === "low" ? "border-success/40 bg-success/10" :
+                  "border-border bg-muted/20"
+                }`}>
+                  {fraudLoading ? <Loader2 className="w-5 h-5 animate-spin" /> :
+                   fraud?.risk === "high" ? <ShieldAlert className="w-5 h-5 text-destructive" /> :
+                   fraud?.risk === "medium" ? <Shield className="w-5 h-5 text-yellow-500" /> :
+                   fraud?.risk === "low" ? <ShieldCheck className="w-5 h-5 text-success" /> :
+                   <Shield className="w-5 h-5 text-muted-foreground" />}
+                  <div className="flex-1 text-xs">
+                    {fraudLoading ? "Checking courier history…" :
+                     !fraud ? "Fraud check will run automatically." :
+                     fraud.risk === "unknown" ? "No previous courier history for this phone number." :
+                     <>
+                       <div className="font-semibold capitalize">{fraud.risk} risk</div>
+                       <div>{fraud.success} delivered · {fraud.cancelled} cancelled out of {fraud.total_parcel} parcels ({Math.round(fraud.success_ratio * 100)}% success)</div>
+                       {fraud.risk === "high" && (
+                         <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                           <input type="checkbox" checked={fraudAck} onChange={(e) => setFraudAck(e.target.checked)} />
+                           <span>I understand the risk and want to proceed.</span>
+                         </label>
+                       )}
+                     </>}
+                  </div>
+                </div>
+              )}
+
+
               <div className="pt-2">
                 <Label className="mb-2 block">Payment method</Label>
                 <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="space-y-2">
