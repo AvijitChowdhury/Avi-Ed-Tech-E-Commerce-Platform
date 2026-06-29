@@ -14,9 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { money } from "@/lib/format";
 import { getSessionId } from "@/lib/session";
-import { Check } from "lucide-react";
+import { Check, ShieldAlert, ShieldCheck, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { fbTrack } from "@/lib/fbpixel";
+import { checkFraud, saveOrderFraud } from "@/lib/fraud.functions";
+import { getCached, setCached, normalizePhone } from "@/lib/fraudCache";
 
 export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
 
@@ -29,10 +31,36 @@ function CheckoutPage() {
   const placeOrderFn = useServerFn(placeOrder);
   const upsertFn = useServerFn(upsertIncompleteOrder);
   const createChargeFn = useServerFn(createPaymentCharge);
+  const fraudFn = useServerFn(checkFraud);
+  const saveFraudFn = useServerFn(saveOrderFraud);
   const [step, setStep] = useState(0);
   const [zones, setZones] = useState<Zone[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE" | "PARTIAL">("COD");
+  const [fraud, setFraud] = useState<any | null>(null);
+  const [fraudLoading, setFraudLoading] = useState(false);
+  const [fraudAck, setFraudAck] = useState(false);
+  const [autoCheckOn, setAutoCheckOn] = useState(true);
+
+  useEffect(() => {
+    supabase.from("app_settings").select("value").eq("key", "fraud").maybeSingle()
+      .then(({ data }) => { if (data?.value && (data.value as any).auto_check === false) setAutoCheckOn(false); });
+  }, []);
+
+  const runFraudCheck = async (phone: string) => {
+    const p = normalizePhone(phone);
+    if (!p || p.length < 6) return;
+    const cached = getCached(p);
+    if (cached) { setFraud({ ...cached, cached: true }); return; }
+    setFraudLoading(true);
+    try {
+      const r: any = await fraudFn({ data: { phone: p } });
+      setFraud(r);
+      setCached(p, r);
+    } catch (e: any) {
+      // silent fail; don't block checkout
+    } finally { setFraudLoading(false); }
+  };
 
   const [form, setForm] = useState({
     customer_name: "",
@@ -87,6 +115,16 @@ function CheckoutPage() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [form, items, subtotal, shipping, total, user?.id, upsertFn]);
 
+  // Auto fraud check when phone is filled and user reaches review step
+  useEffect(() => {
+    if (!autoCheckOn) return;
+    if (step !== 2) return;
+    if (!form.customer_phone) return;
+    if (fraud && normalizePhone(form.customer_phone) === normalizePhone(fraud.phone || "")) return;
+    runFraudCheck(form.customer_phone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, form.customer_phone, autoCheckOn]);
+
   const submit = async () => {
     if (!items.length) return;
     setSubmitting(true);
@@ -114,6 +152,8 @@ function CheckoutPage() {
           payment_method: paymentMethod,
         },
       });
+      // persist the fraud snapshot onto the order (best-effort)
+      saveFraudFn({ data: { order_id: r.id, phone: form.customer_phone } }).catch(() => {});
       clear();
 
       if (paymentMethod === "ONLINE" || paymentMethod === "PARTIAL") {
@@ -208,6 +248,38 @@ function CheckoutPage() {
               <div><span className="text-muted-foreground">Address:</span> {form.line1}, {form.city}</div>
               <div><span className="text-muted-foreground">Zone:</span> {zone?.name}</div>
 
+              {autoCheckOn && (
+                <div className={`rounded-xl border p-3 flex items-start gap-3 ${
+                  fraudLoading ? "border-border bg-muted/30" :
+                  fraud?.risk === "high" ? "border-destructive/50 bg-destructive/10" :
+                  fraud?.risk === "medium" ? "border-yellow-500/40 bg-yellow-500/10" :
+                  fraud?.risk === "low" ? "border-success/40 bg-success/10" :
+                  "border-border bg-muted/20"
+                }`}>
+                  {fraudLoading ? <Loader2 className="w-5 h-5 animate-spin" /> :
+                   fraud?.risk === "high" ? <ShieldAlert className="w-5 h-5 text-destructive" /> :
+                   fraud?.risk === "medium" ? <Shield className="w-5 h-5 text-yellow-500" /> :
+                   fraud?.risk === "low" ? <ShieldCheck className="w-5 h-5 text-success" /> :
+                   <Shield className="w-5 h-5 text-muted-foreground" />}
+                  <div className="flex-1 text-xs">
+                    {fraudLoading ? "Checking courier history…" :
+                     !fraud ? "Fraud check will run automatically." :
+                     fraud.risk === "unknown" ? "No previous courier history for this phone number." :
+                     <>
+                       <div className="font-semibold capitalize">{fraud.risk} risk</div>
+                       <div>{fraud.success} delivered · {fraud.cancelled} cancelled out of {fraud.total_parcel} parcels ({Math.round(fraud.success_ratio * 100)}% success)</div>
+                       {fraud.risk === "high" && (
+                         <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                           <input type="checkbox" checked={fraudAck} onChange={(e) => setFraudAck(e.target.checked)} />
+                           <span>I understand the risk and want to proceed.</span>
+                         </label>
+                       )}
+                     </>}
+                  </div>
+                </div>
+              )}
+
+
               <div className="pt-2">
                 <Label className="mb-2 block">Payment method</Label>
                 <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="space-y-2">
@@ -243,7 +315,7 @@ function CheckoutPage() {
           {step < 2 ? (
             <Button onClick={() => setStep((s) => s + 1)} disabled={!stepValid} className="gradient-primary-bg text-primary-foreground">Continue</Button>
           ) : (
-            <Button onClick={submit} disabled={submitting} className="gradient-primary-bg text-primary-foreground glow-primary">
+            <Button onClick={submit} disabled={submitting || (autoCheckOn && fraud?.risk === "high" && !fraudAck)} className="gradient-primary-bg text-primary-foreground glow-primary">
               {submitting ? "Placing order..." : "Place order"}
             </Button>
           )}
