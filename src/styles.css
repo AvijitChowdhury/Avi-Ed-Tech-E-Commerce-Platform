@@ -184,8 +184,8 @@
 }
 
 @utility card-glass {
-  background: oklch(0.18 0.015 270 / 0.55);
-  border: 1px solid oklch(0.45 0.02 270 / 0.18);
+  background: oklch(0.21 0.022 160 / 0.55);
+  border: 1px solid oklch(0.50 0.025 150 / 0.20);
   backdrop-filter: blur(20px) saturate(140%);
   box-shadow: var(--shadow-soft);
 }
@@ -209,8 +209,8 @@
 @utility animate-marquee { animation: marquee 40s linear infinite; }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 30px -8px oklch(0.68 0.22 290 / 0.45); }
-  50% { box-shadow: 0 0 60px -8px oklch(0.68 0.22 290 / 0.75); }
+  0%, 100% { box-shadow: 0 0 30px -8px oklch(0.82 0.17 78 / 0.45); }
+  50% { box-shadow: 0 0 60px -8px oklch(0.82 0.17 78 / 0.75); }
 }
 @utility animate-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
 
