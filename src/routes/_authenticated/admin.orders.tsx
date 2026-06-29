@@ -175,6 +175,7 @@ function AdminOrders() {
                   <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}</SelectContent>
                 </Select>
                 <Button size="sm" variant="destructive" onClick={bulkTrash}><Trash2 className="w-4 h-4 mr-1" />Move to trash</Button>
+                <Button size="sm" onClick={bulkShip}><Truck className="w-4 h-4 mr-1" />Ship via Steadfast</Button>
               </>
             ) : (
               <>
