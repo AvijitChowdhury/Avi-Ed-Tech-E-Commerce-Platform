@@ -192,13 +192,39 @@ function CheckoutPage() {
             </>
           )}
           {step === 2 && (
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <div><span className="text-muted-foreground">Name:</span> {form.customer_name}</div>
               <div><span className="text-muted-foreground">Email:</span> {form.customer_email}</div>
               <div><span className="text-muted-foreground">Phone:</span> {form.customer_phone}</div>
               <div><span className="text-muted-foreground">Address:</span> {form.line1}, {form.city}</div>
               <div><span className="text-muted-foreground">Zone:</span> {zone?.name}</div>
-              <div className="font-semibold">Payment: Cash on Delivery (COD)</div>
+
+              <div className="pt-2">
+                <Label className="mb-2 block">Payment method</Label>
+                <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="space-y-2">
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="COD" id="pm-cod" />
+                    <div>
+                      <div className="font-semibold">Cash on Delivery</div>
+                      <div className="text-xs text-muted-foreground">Pay {money(total)} when you receive the order.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="ONLINE" id="pm-online" />
+                    <div>
+                      <div className="font-semibold">Pay online (UddoktaPay)</div>
+                      <div className="text-xs text-muted-foreground">Pay the full {money(total)} now via bKash/Nagad/Card.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="PARTIAL" id="pm-partial" />
+                    <div>
+                      <div className="font-semibold">Partial payment (delivery charge online + COD)</div>
+                      <div className="text-xs text-muted-foreground">Pay {money(shipping)} delivery charge now, {money(subtotal)} on delivery.</div>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
             </div>
           )}
         </div>
