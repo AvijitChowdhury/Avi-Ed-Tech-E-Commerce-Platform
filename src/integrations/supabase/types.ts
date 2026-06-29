@@ -463,6 +463,11 @@ export type Database = {
           shipping_address: Json
           source_incomplete_id: string | null
           status: Database["public"]["Enums"]["order_status"]
+          steadfast_consignment_id: string | null
+          steadfast_shipped_at: string | null
+          steadfast_status: string | null
+          steadfast_synced_at: string | null
+          steadfast_tracking_code: string | null
           subtotal: number
           total: number
           transaction_id: string | null
@@ -492,6 +497,11 @@ export type Database = {
           shipping_address: Json
           source_incomplete_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          steadfast_consignment_id?: string | null
+          steadfast_shipped_at?: string | null
+          steadfast_status?: string | null
+          steadfast_synced_at?: string | null
+          steadfast_tracking_code?: string | null
           subtotal?: number
           total?: number
           transaction_id?: string | null
@@ -521,6 +531,11 @@ export type Database = {
           shipping_address?: Json
           source_incomplete_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          steadfast_consignment_id?: string | null
+          steadfast_shipped_at?: string | null
+          steadfast_status?: string | null
+          steadfast_synced_at?: string | null
+          steadfast_tracking_code?: string | null
           subtotal?: number
           total?: number
           transaction_id?: string | null

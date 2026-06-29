@@ -10,6 +10,7 @@ import {
   deleteOrdersPermanently,
   createManualOrder,
 } from "@/lib/admin.functions";
+import { shipOrdersToSteadfast, syncSteadfastStatuses } from "@/lib/steadfast.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { money } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, Trash2, RotateCcw, X } from "lucide-react";
+import { Plus, Trash2, RotateCcw, X, Truck, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({ component: AdminOrders });
 
@@ -45,6 +46,8 @@ function AdminOrders() {
   const restoreFn = useServerFn(restoreOrders);
   const deleteFn = useServerFn(deleteOrdersPermanently);
   const createFn = useServerFn(createManualOrder);
+  const shipFn = useServerFn(shipOrdersToSteadfast);
+  const syncFn = useServerFn(syncSteadfastStatuses);
 
   const load = () =>
     supabase
@@ -106,6 +109,23 @@ function AdminOrders() {
     try { await deleteFn({ data: { ids } }); toast.success("Deleted"); clearSel(); load(); }
     catch (e: any) { toast.error(e?.message ?? "Failed"); }
   };
+  const bulkShip = async () => {
+    if (!ids.length) return;
+    if (!confirm(`Send ${ids.length} order(s) to Steadfast Courier?`)) return;
+    try {
+      const r: any = await shipFn({ data: { ids } });
+      toast.success(`Steadfast: ${r.created} shipped, ${r.skipped} skipped`);
+      if (r.errors?.length) toast.error(r.errors.slice(0, 3).join(" • "));
+      clearSel(); load();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
+  const syncSteadfast = async () => {
+    try {
+      const r: any = await syncFn({});
+      toast.success(`Synced ${r.updated}/${r.checked} from Steadfast`);
+      load();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
 
   return (
     <div className="space-y-5">
@@ -123,6 +143,7 @@ function AdminOrders() {
               {STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Button variant="outline" onClick={syncSteadfast}><RefreshCw className="w-4 h-4 mr-1" />Sync Steadfast</Button>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="w-4 h-4 mr-1" />Add order</Button>
@@ -154,6 +175,7 @@ function AdminOrders() {
                   <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}</SelectContent>
                 </Select>
                 <Button size="sm" variant="destructive" onClick={bulkTrash}><Trash2 className="w-4 h-4 mr-1" />Move to trash</Button>
+                <Button size="sm" onClick={bulkShip}><Truck className="w-4 h-4 mr-1" />Ship via Steadfast</Button>
               </>
             ) : (
               <>
