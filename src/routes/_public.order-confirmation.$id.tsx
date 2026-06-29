@@ -1,21 +1,47 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Check, Download } from "lucide-react";
+import { Check, Download, AlertCircle } from "lucide-react";
 import { money } from "@/lib/format";
+import { useServerFn } from "@tanstack/react-start";
+import { createPaymentCharge } from "@/lib/payment.functions";
+import { toast } from "sonner";
 
-export const Route = createFileRoute("/_public/order-confirmation/$id")({ component: ConfirmPage });
+export const Route = createFileRoute("/_public/order-confirmation/$id")({
+  component: ConfirmPage,
+  validateSearch: (s: Record<string, unknown>) => ({ payment: (s.payment as string | undefined) ?? undefined }),
+});
 
 function ConfirmPage() {
   const { id } = Route.useParams();
+  const { payment } = useSearch({ from: "/_public/order-confirmation/$id" });
   const [order, setOrder] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
+  const [retrying, setRetrying] = useState(false);
+  const createChargeFn = useServerFn(createPaymentCharge);
 
   useEffect(() => {
     supabase.from("orders").select("*").eq("id", id).maybeSingle().then(({ data }) => setOrder(data));
     supabase.from("order_items").select("*").eq("order_id", id).then(({ data }) => setItems((data as any) ?? []));
   }, [id]);
+
+  const retry = async () => {
+    if (!order) return;
+    setRetrying(true);
+    try {
+      const partial = order.payment_method === "PARTIAL";
+      const amount = partial ? Number(order.shipping) : Number(order.total) - Number(order.paid_amount || 0);
+      const r = await createChargeFn({
+        data: { order_id: order.id, amount, full_name: order.customer_name, email: order.customer_email, origin: window.location.origin, partial },
+      });
+      window.location.href = r.payment_url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to start payment");
+      setRetrying(false);
+    }
+  };
+
 
   const downloadInvoice = async () => {
     if (!order) return;
@@ -54,13 +80,29 @@ function ConfirmPage() {
 
   if (!order) return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div>;
 
+  const paymentFailed = payment === "failed" || order.payment_status === "failed";
+  const paymentSuccess = payment === "success" || order.payment_status === "paid" || order.payment_status === "partial_paid";
+  const needsPayment = (order.payment_method === "ONLINE" || order.payment_method === "PARTIAL") && !paymentSuccess;
+
   return (
     <div className="container mx-auto px-4 py-14 max-w-2xl text-center">
-      <div className="h-16 w-16 mx-auto rounded-full gradient-primary-bg flex items-center justify-center glow-primary mb-5">
-        <Check className="h-8 w-8 text-primary-foreground" />
+      <div className={`h-16 w-16 mx-auto rounded-full flex items-center justify-center mb-5 ${paymentFailed ? "bg-destructive text-destructive-foreground" : "gradient-primary-bg glow-primary"}`}>
+        {paymentFailed ? <AlertCircle className="h-8 w-8" /> : <Check className="h-8 w-8 text-primary-foreground" />}
       </div>
-      <h1 className="font-display text-3xl font-bold mb-2">Thank you for your order!</h1>
-      <p className="text-muted-foreground mb-8">Your order <span className="font-mono font-bold text-foreground">{order.order_number}</span> has been placed. We'll email you a confirmation shortly.</p>
+      <h1 className="font-display text-3xl font-bold mb-2">
+        {paymentFailed ? "Payment didn't complete" : "Thank you for your order!"}
+      </h1>
+      <p className="text-muted-foreground mb-6">
+        Order <span className="font-mono font-bold text-foreground">{order.order_number}</span>
+        {paymentSuccess ? " is confirmed." : paymentFailed ? " was placed but payment did not go through." : " has been placed."}
+      </p>
+
+      {(Number(order.paid_amount) > 0 || Number(order.due_amount) > 0) && (
+        <div className="card-elevated rounded-xl p-4 mb-4 text-sm inline-flex flex-col">
+          {Number(order.paid_amount) > 0 && <div>Paid: <b>{money(order.paid_amount)}</b>{order.transaction_id && <> · Txn <span className="font-mono">{order.transaction_id}</span></>}</div>}
+          {Number(order.due_amount) > 0 && <div>Due on delivery: <b>{money(order.due_amount)}</b></div>}
+        </div>
+      )}
 
       <div className="card-elevated rounded-2xl p-6 text-left space-y-3 mb-6">
         {items.map((it) => (
@@ -75,7 +117,12 @@ function ConfirmPage() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <Button onClick={downloadInvoice} className="gradient-primary-bg text-primary-foreground">
+        {needsPayment && (
+          <Button onClick={retry} disabled={retrying} className="gradient-primary-bg text-primary-foreground glow-primary">
+            {retrying ? "Redirecting…" : paymentFailed ? "Retry payment" : "Pay now"}
+          </Button>
+        )}
+        <Button onClick={downloadInvoice} variant="outline">
           <Download className="mr-2 h-4 w-4" /> Download invoice
         </Button>
         <Link to="/products"><Button variant="outline">Keep shopping</Button></Link>

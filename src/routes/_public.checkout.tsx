@@ -5,6 +5,8 @@ import { useAuth } from "@/stores/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useServerFn } from "@tanstack/react-start";
 import { placeOrder, upsertIncompleteOrder } from "@/lib/checkout.functions";
+import { createPaymentCharge } from "@/lib/payment.functions";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,9 +27,11 @@ function CheckoutPage() {
   const { user } = useAuth();
   const placeOrderFn = useServerFn(placeOrder);
   const upsertFn = useServerFn(upsertIncompleteOrder);
+  const createChargeFn = useServerFn(createPaymentCharge);
   const [step, setStep] = useState(0);
   const [zones, setZones] = useState<Zone[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE" | "PARTIAL">("COD");
 
   const [form, setForm] = useState({
     customer_name: "",
@@ -99,9 +103,29 @@ function CheckoutPage() {
           zone_id: form.zone_id,
           cart: items.map((i) => ({ product_id: i.product_id, title: i.title, price: i.price, qty: i.qty, image: i.image })),
           notes: form.notes || null,
+          payment_method: paymentMethod,
         },
       });
       clear();
+
+      if (paymentMethod === "ONLINE" || paymentMethod === "PARTIAL") {
+        const amount = paymentMethod === "PARTIAL" ? shipping : total;
+        if (amount <= 0) throw new Error("Invalid payment amount");
+        const charge = await createChargeFn({
+          data: {
+            order_id: r.id,
+            amount,
+            full_name: form.customer_name,
+            email: form.customer_email,
+            origin: window.location.origin,
+            partial: paymentMethod === "PARTIAL",
+          },
+        });
+        toast.success("Redirecting to payment gateway…");
+        window.location.href = charge.payment_url;
+        return;
+      }
+
       toast.success("Order placed!");
       navigate({ to: "/order-confirmation/$id", params: { id: r.id } });
     } catch (e: any) {
@@ -169,13 +193,39 @@ function CheckoutPage() {
             </>
           )}
           {step === 2 && (
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <div><span className="text-muted-foreground">Name:</span> {form.customer_name}</div>
               <div><span className="text-muted-foreground">Email:</span> {form.customer_email}</div>
               <div><span className="text-muted-foreground">Phone:</span> {form.customer_phone}</div>
               <div><span className="text-muted-foreground">Address:</span> {form.line1}, {form.city}</div>
               <div><span className="text-muted-foreground">Zone:</span> {zone?.name}</div>
-              <div className="font-semibold">Payment: Cash on Delivery (COD)</div>
+
+              <div className="pt-2">
+                <Label className="mb-2 block">Payment method</Label>
+                <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)} className="space-y-2">
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="COD" id="pm-cod" />
+                    <div>
+                      <div className="font-semibold">Cash on Delivery</div>
+                      <div className="text-xs text-muted-foreground">Pay {money(total)} when you receive the order.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="ONLINE" id="pm-online" />
+                    <div>
+                      <div className="font-semibold">Pay online (UddoktaPay)</div>
+                      <div className="text-xs text-muted-foreground">Pay the full {money(total)} now via bKash/Nagad/Card.</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:border-primary">
+                    <RadioGroupItem value="PARTIAL" id="pm-partial" />
+                    <div>
+                      <div className="font-semibold">Partial payment (delivery charge online + COD)</div>
+                      <div className="text-xs text-muted-foreground">Pay {money(shipping)} delivery charge now, {money(subtotal)} on delivery.</div>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
             </div>
           )}
         </div>

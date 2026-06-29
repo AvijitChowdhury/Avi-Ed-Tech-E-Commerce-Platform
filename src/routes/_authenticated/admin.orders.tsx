@@ -47,19 +47,33 @@ function AdminOrders() {
         </Select>
       </div>
 
-      <div className="card-elevated rounded-2xl overflow-hidden">
+      <div className="card-elevated rounded-2xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted/40">
             <tr className="text-left">
-              <th className="p-3">Order</th><th className="p-3">Customer</th><th className="p-3">Total</th><th className="p-3">Status</th><th className="p-3">Source</th><th className="p-3">Date</th>
+              <th className="p-3">Order</th><th className="p-3">Customer</th><th className="p-3">Total</th>
+              <th className="p-3">Payment</th><th className="p-3">Txn / Sender</th>
+              <th className="p-3">Status</th><th className="p-3">Source</th><th className="p-3">Date</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((o) => (
-              <tr key={o.id} className="border-t border-border">
+              <tr key={o.id} className="border-t border-border align-top">
                 <td className="p-3 font-mono">{o.order_number}</td>
                 <td className="p-3"><div>{o.customer_name}</div><div className="text-xs text-muted-foreground">{o.customer_email}</div></td>
                 <td className="p-3 font-bold gradient-text">{money(o.total)}</td>
+                <td className="p-3">
+                  <Badge variant="outline" className="capitalize">{o.payment_method}</Badge>
+                  <div className={`text-xs mt-1 capitalize ${o.payment_status === "paid" ? "text-success" : o.payment_status === "failed" ? "text-destructive" : "text-muted-foreground"}`}>
+                    {o.payment_status?.replace("_", " ") ?? "unpaid"}
+                  </div>
+                  {Number(o.paid_amount) > 0 && <div className="text-xs">Paid {money(o.paid_amount)} {Number(o.due_amount) > 0 && <>· Due {money(o.due_amount)}</>}</div>}
+                </td>
+                <td className="p-3 text-xs">
+                  {o.transaction_id && <div className="font-mono">{o.transaction_id}</div>}
+                  {o.sender_number && <div className="text-muted-foreground">{o.sender_number}</div>}
+                  {!o.transaction_id && !o.sender_number && <span className="text-muted-foreground">—</span>}
+                </td>
                 <td className="p-3">
                   <Select value={o.status} onValueChange={(v) => change(o.id, v)}>
                     <SelectTrigger className="w-36 h-8 capitalize"><SelectValue /></SelectTrigger>
@@ -70,7 +84,7 @@ function AdminOrders() {
                 <td className="p-3 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</td>
               </tr>
             ))}
-            {!filtered.length && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No orders.</td></tr>}
+            {!filtered.length && <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">No orders.</td></tr>}
           </tbody>
         </table>
       </div>

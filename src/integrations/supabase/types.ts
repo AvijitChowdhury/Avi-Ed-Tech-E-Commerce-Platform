@@ -416,17 +416,25 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          due_amount: number
           id: string
+          invoice_id: string | null
           notes: string | null
           order_number: string
+          paid_amount: number
+          payment_meta: Json | null
           payment_method: string
+          payment_provider: string | null
+          payment_status: string
           recovered_from_incomplete: boolean
+          sender_number: string | null
           shipping: number
           shipping_address: Json
           source_incomplete_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           total: number
+          transaction_id: string | null
           updated_at: string
           user_id: string | null
           zone_id: string | null
@@ -436,17 +444,25 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          due_amount?: number
           id?: string
+          invoice_id?: string | null
           notes?: string | null
           order_number?: string
+          paid_amount?: number
+          payment_meta?: Json | null
           payment_method?: string
+          payment_provider?: string | null
+          payment_status?: string
           recovered_from_incomplete?: boolean
+          sender_number?: string | null
           shipping?: number
           shipping_address: Json
           source_incomplete_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string | null
           zone_id?: string | null
@@ -456,17 +472,25 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          due_amount?: number
           id?: string
+          invoice_id?: string | null
           notes?: string | null
           order_number?: string
+          paid_amount?: number
+          payment_meta?: Json | null
           payment_method?: string
+          payment_provider?: string | null
+          payment_status?: string
           recovered_from_incomplete?: boolean
+          sender_number?: string | null
           shipping?: number
           shipping_address?: Json
           source_incomplete_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string | null
           zone_id?: string | null

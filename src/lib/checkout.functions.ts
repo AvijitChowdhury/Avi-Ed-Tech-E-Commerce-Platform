@@ -74,6 +74,7 @@ const placeOrderSchema = z.object({
   cart: z.array(cartLine).min(1).max(50),
   notes: z.string().max(500).optional().nullable(),
   user_id: z.string().uuid().nullable().optional(),
+  payment_method: z.enum(["COD", "ONLINE", "PARTIAL"]).optional(),
 });
 
 export const placeOrder = createServerFn({ method: "POST" })
@@ -100,7 +101,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         subtotal,
         shipping,
         total,
-        payment_method: "COD",
+        payment_method: data.payment_method ?? "COD",
         notes: data.notes ?? null,
       })
       .select("id, order_number")
