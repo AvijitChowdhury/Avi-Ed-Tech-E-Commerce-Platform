@@ -533,7 +533,7 @@ function TagQuickAdd({ onAdd }: { onAdd: (name: string) => Promise<void> }) {
   return (
     <div className="flex gap-2 mt-3">
       <Input placeholder="Create new tag..." value={name} onChange={(e) => setName(e.target.value)} className="h-8" />
-      <Button type="button" size="sm" variant="outline" onClick={async () => { await onAdd(name); setName(""); }}>Add</Button>
+      <Button type="button" size="sm" variant="outline" onClick={async () => { await onAdd(name); setName(""); }}>Add</Button>{/* */}
     </div>
   );
 }
