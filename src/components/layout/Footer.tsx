@@ -23,9 +23,9 @@ export default function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/products" className="hover:text-primary">All courses</Link></li>
             <li><Link to="/products" search={{ type: "lab" } as any} className="hover:text-primary">Hands-on labs</Link></li>
-            <li><Link to="/categories/cybersecurity" className="hover:text-primary">Cybersecurity</Link></li>
-            <li><Link to="/categories/machine-learning" className="hover:text-primary">Machine Learning</Link></li>
-            <li><Link to="/categories/web-development" className="hover:text-primary">Web Development</Link></li>
+            <li><Link to="/categories/$slug" params={{ slug: "cybersecurity" }} className="hover:text-primary">Cybersecurity</Link></li>
+            <li><Link to="/categories/$slug" params={{ slug: "machine-learning" }} className="hover:text-primary">Machine Learning</Link></li>
+            <li><Link to="/categories/$slug" params={{ slug: "web-development" }} className="hover:text-primary">Web Development</Link></li>
           </ul>
         </div>
         <div>
