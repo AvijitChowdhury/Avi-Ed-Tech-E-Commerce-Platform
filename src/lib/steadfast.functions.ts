@@ -138,7 +138,7 @@ export async function runSteadfastSync() {
         steadfast_synced_at: new Date().toISOString(),
       };
       if (mapped !== (o as any).status) patch.status = mapped;
-      await supabaseAdmin.from("orders").update(patch).eq("id", o.id);
+      await supabaseAdmin.from("orders").update(patch as any).eq("id", o.id);
       updated++;
     } catch (e: any) {
       errors.push(`${o.order_number}: ${e?.message || "fetch error"}`);
