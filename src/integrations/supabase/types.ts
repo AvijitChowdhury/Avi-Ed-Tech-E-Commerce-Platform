@@ -416,6 +416,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          deleted_at: string | null
           due_amount: number
           id: string
           invoice_id: string | null
@@ -444,6 +445,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string
+          deleted_at?: string | null
           due_amount?: number
           id?: string
           invoice_id?: string | null
@@ -472,6 +474,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          deleted_at?: string | null
           due_amount?: number
           id?: string
           invoice_id?: string | null
