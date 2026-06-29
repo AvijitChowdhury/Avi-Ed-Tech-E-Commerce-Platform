@@ -38,6 +38,7 @@ import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authe
 import { Route as AuthenticatedAccountOrdersRouteImport } from './routes/_authenticated/account.orders'
 import { Route as AuthenticatedAccountAddressesRouteImport } from './routes/_authenticated/account.addresses'
 import { Route as ApiPublicPaymentCallbackRouteImport } from './routes/api/public/payment.callback'
+import { Route as ApiPublicHooksSteadfastSyncRouteImport } from './routes/api/public/hooks/steadfast-sync'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -196,6 +197,12 @@ const ApiPublicPaymentCallbackRoute =
     path: '/api/public/payment/callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSteadfastSyncRoute =
+  ApiPublicHooksSteadfastSyncRouteImport.update({
+    id: '/api/public/hooks/steadfast-sync',
+    path: '/api/public/hooks/steadfast-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -251,6 +259,7 @@ export interface FileRoutesByTo {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRoutesById {
@@ -283,6 +292,7 @@ export interface FileRoutesById {
   '/_public/products/$slug': typeof PublicProductsSlugRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
 export interface FileRouteTypes {
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account/'
     | '/admin/'
+    | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account'
     | '/admin'
+    | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   id:
     | '__root__'
@@ -372,6 +384,7 @@ export interface FileRouteTypes {
     | '/_public/products/$slug'
     | '/_authenticated/account/'
     | '/_authenticated/admin/'
+    | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   fileRoutesById: FileRoutesById
 }
@@ -379,6 +392,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicHooksSteadfastSyncRoute: typeof ApiPublicHooksSteadfastSyncRoute
   ApiPublicPaymentCallbackRoute: typeof ApiPublicPaymentCallbackRoute
 }
 
@@ -587,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/steadfast-sync': {
+      id: '/api/public/hooks/steadfast-sync'
+      path: '/api/public/hooks/steadfast-sync'
+      fullPath: '/api/public/hooks/steadfast-sync'
+      preLoaderRoute: typeof ApiPublicHooksSteadfastSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -690,6 +711,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicHooksSteadfastSyncRoute: ApiPublicHooksSteadfastSyncRoute,
   ApiPublicPaymentCallbackRoute: ApiPublicPaymentCallbackRoute,
 }
 export const routeTree = rootRouteImport

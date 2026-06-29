@@ -10,6 +10,7 @@ import {
   deleteOrdersPermanently,
   createManualOrder,
 } from "@/lib/admin.functions";
+import { shipOrdersToSteadfast, syncSteadfastStatuses } from "@/lib/steadfast.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { money } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, Trash2, RotateCcw, X } from "lucide-react";
+import { Plus, Trash2, RotateCcw, X, Truck, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({ component: AdminOrders });
 
