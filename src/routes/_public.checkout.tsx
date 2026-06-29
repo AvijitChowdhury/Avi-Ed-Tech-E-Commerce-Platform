@@ -106,6 +106,25 @@ function CheckoutPage() {
         },
       });
       clear();
+
+      if (paymentMethod === "ONLINE" || paymentMethod === "PARTIAL") {
+        const amount = paymentMethod === "PARTIAL" ? shipping : total;
+        if (amount <= 0) throw new Error("Invalid payment amount");
+        const charge = await createChargeFn({
+          data: {
+            order_id: r.id,
+            amount,
+            full_name: form.customer_name,
+            email: form.customer_email,
+            origin: window.location.origin,
+            partial: paymentMethod === "PARTIAL",
+          },
+        });
+        toast.success("Redirecting to payment gateway…");
+        window.location.href = charge.payment_url;
+        return;
+      }
+
       toast.success("Order placed!");
       navigate({ to: "/order-confirmation/$id", params: { id: r.id } });
     } catch (e: any) {
