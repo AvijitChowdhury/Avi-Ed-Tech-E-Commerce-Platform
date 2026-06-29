@@ -101,7 +101,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         subtotal,
         shipping,
         total,
-        payment_method: "COD",
+        payment_method: data.payment_method ?? "COD",
         notes: data.notes ?? null,
       })
       .select("id, order_number")
