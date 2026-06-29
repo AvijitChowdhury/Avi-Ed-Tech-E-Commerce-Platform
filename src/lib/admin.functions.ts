@@ -7,12 +7,17 @@ async function ensureAdmin(ctx: { supabase: any; userId: string }) {
   if (error || !data) throw new Error("Forbidden");
 }
 
+async function adminClient() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
+}
+
 export const convertIncompleteToOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ ids: z.array(z.string().uuid()).min(1).max(50) }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context);
-    const sb = context.supabase;
+    const sb = await adminClient();
     const results: { id: string; order_id: string; order_number: string }[] = [];
 
     for (const id of data.ids) {

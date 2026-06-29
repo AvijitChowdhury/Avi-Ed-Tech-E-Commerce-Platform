@@ -1,12 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import type { Database } from "@/integrations/supabase/types";
 
-function publicClient() {
-  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-  });
+async function adminClient() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return supabaseAdmin;
 }
 
 const cartLine = z.object({
@@ -35,7 +32,7 @@ const incompleteSchema = z.object({
 export const upsertIncompleteOrder = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => incompleteSchema.parse(d))
   .handler(async ({ data }) => {
-    const sb = publicClient();
+    const sb = await adminClient();
     const { error } = await sb
       .from("incomplete_orders")
       .upsert(
@@ -80,8 +77,7 @@ const placeOrderSchema = z.object({
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => placeOrderSchema.parse(d))
   .handler(async ({ data }) => {
-    const sb = publicClient();
-    // Look up zone price
+    const sb = await adminClient();
     const { data: zone, error: zErr } = await sb.from("delivery_zones").select("price").eq("id", data.zone_id).maybeSingle();
     if (zErr || !zone) throw new Error("Invalid delivery zone");
 
@@ -120,7 +116,6 @@ export const placeOrder = createServerFn({ method: "POST" })
     );
     if (iErr) throw new Error(iErr.message);
 
-    // Mark the matching incomplete order as converted (if exists)
     await sb
       .from("incomplete_orders")
       .update({ converted_to_order_id: order.id })
@@ -134,7 +129,7 @@ export const trackOrder = createServerFn({ method: "POST" })
     z.object({ order_number: z.string().min(4).max(40), email: z.string().email().max(255) }).parse(d),
   )
   .handler(async ({ data }) => {
-    const sb = publicClient();
+    const sb = await adminClient();
     const { data: order } = await sb
       .from("orders")
       .select("id, order_number, status, customer_name, total, created_at, updated_at, shipping_address")
@@ -143,4 +138,14 @@ export const trackOrder = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!order) return { found: false as const };
     return { found: true as const, order };
+  });
+
+export const getOrderForConfirmation = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const sb = await adminClient();
+    const { data: order } = await sb.from("orders").select("*").eq("id", data.id).maybeSingle();
+    if (!order) return { order: null, items: [] as any[] };
+    const { data: items } = await sb.from("order_items").select("*").eq("order_id", data.id);
+    return { order, items: (items as any[]) ?? [] };
   });

@@ -73,10 +73,10 @@ export default function ChatWidget() {
   };
 
   const startChat = async () => {
-    if (!name.trim() || !email.trim()) return;
+    if (!user || !name.trim() || !email.trim()) return;
     const { data, error } = await supabase
       .from("chat_sessions")
-      .insert({ guest_name: name.trim(), guest_email: email.trim(), user_id: user?.id ?? null })
+      .insert({ guest_name: name.trim(), guest_email: email.trim(), user_id: user.id })
       .select("id")
       .single();
     if (error || !data) return;
@@ -115,7 +115,12 @@ export default function ChatWidget() {
             <div className="text-xs opacity-90">Typically replies in a few minutes</div>
           </div>
 
-          {!sessionId ? (
+          {!user ? (
+            <div className="p-4 flex flex-col gap-3 flex-1 items-center justify-center text-center">
+              <p className="text-sm text-muted-foreground">Please sign in to start a secure chat with our team.</p>
+              <a href="/auth" className="underline text-primary">Sign in</a>
+            </div>
+          ) : !sessionId ? (
             <div className="p-4 flex flex-col gap-3 flex-1">
               <p className="text-sm text-muted-foreground">Tell us who you are and we'll get back to you fast.</p>
               <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
