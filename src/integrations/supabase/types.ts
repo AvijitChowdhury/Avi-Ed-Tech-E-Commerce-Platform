@@ -91,6 +91,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           active: boolean
@@ -323,6 +344,45 @@ export type Database = {
         }
         Relationships: []
       }
+      fraud_checks: {
+        Row: {
+          cancelled: number | null
+          checked_at: string
+          created_at: string
+          phone: string
+          raw: Json | null
+          risk: string | null
+          success: number | null
+          success_ratio: number | null
+          total_parcel: number | null
+          updated_at: string
+        }
+        Insert: {
+          cancelled?: number | null
+          checked_at?: string
+          created_at?: string
+          phone: string
+          raw?: Json | null
+          risk?: string | null
+          success?: number | null
+          success_ratio?: number | null
+          total_parcel?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cancelled?: number | null
+          checked_at?: string
+          created_at?: string
+          phone?: string
+          raw?: Json | null
+          risk?: string | null
+          success?: number | null
+          success_ratio?: number | null
+          total_parcel?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       incomplete_orders: {
         Row: {
           cart: Json
@@ -448,6 +508,13 @@ export type Database = {
           customer_phone: string
           deleted_at: string | null
           due_amount: number
+          fraud_cancelled: number | null
+          fraud_checked_at: string | null
+          fraud_raw: Json | null
+          fraud_risk: string | null
+          fraud_success: number | null
+          fraud_success_ratio: number | null
+          fraud_total_parcel: number | null
           id: string
           invoice_id: string | null
           notes: string | null
@@ -482,6 +549,13 @@ export type Database = {
           customer_phone: string
           deleted_at?: string | null
           due_amount?: number
+          fraud_cancelled?: number | null
+          fraud_checked_at?: string | null
+          fraud_raw?: Json | null
+          fraud_risk?: string | null
+          fraud_success?: number | null
+          fraud_success_ratio?: number | null
+          fraud_total_parcel?: number | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
@@ -516,6 +590,13 @@ export type Database = {
           customer_phone?: string
           deleted_at?: string | null
           due_amount?: number
+          fraud_cancelled?: number | null
+          fraud_checked_at?: string | null
+          fraud_raw?: Json | null
+          fraud_risk?: string | null
+          fraud_success?: number | null
+          fraud_success_ratio?: number | null
+          fraud_total_parcel?: number | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
