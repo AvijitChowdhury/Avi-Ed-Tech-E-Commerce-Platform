@@ -10,7 +10,11 @@ function admin() {
 }
 
 function gatewayBase() {
-  return (process.env.UDDOKTAPAY_BASE_URL || "").replace(/\/+$/, "");
+  // Normalize: strip trailing slashes and a trailing `/api` if present,
+  // so we can safely append `/api/...` paths regardless of how the user set the base URL.
+  return (process.env.UDDOKTAPAY_BASE_URL || "")
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
 }
 
 async function callGateway(path: string, body: unknown) {
