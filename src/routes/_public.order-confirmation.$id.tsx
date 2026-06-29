@@ -80,13 +80,29 @@ function ConfirmPage() {
 
   if (!order) return <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div>;
 
+  const paymentFailed = payment === "failed" || order.payment_status === "failed";
+  const paymentSuccess = payment === "success" || order.payment_status === "paid" || order.payment_status === "partial_paid";
+  const needsPayment = (order.payment_method === "ONLINE" || order.payment_method === "PARTIAL") && !paymentSuccess;
+
   return (
     <div className="container mx-auto px-4 py-14 max-w-2xl text-center">
-      <div className="h-16 w-16 mx-auto rounded-full gradient-primary-bg flex items-center justify-center glow-primary mb-5">
-        <Check className="h-8 w-8 text-primary-foreground" />
+      <div className={`h-16 w-16 mx-auto rounded-full flex items-center justify-center mb-5 ${paymentFailed ? "bg-destructive text-destructive-foreground" : "gradient-primary-bg glow-primary"}`}>
+        {paymentFailed ? <AlertCircle className="h-8 w-8" /> : <Check className="h-8 w-8 text-primary-foreground" />}
       </div>
-      <h1 className="font-display text-3xl font-bold mb-2">Thank you for your order!</h1>
-      <p className="text-muted-foreground mb-8">Your order <span className="font-mono font-bold text-foreground">{order.order_number}</span> has been placed. We'll email you a confirmation shortly.</p>
+      <h1 className="font-display text-3xl font-bold mb-2">
+        {paymentFailed ? "Payment didn't complete" : "Thank you for your order!"}
+      </h1>
+      <p className="text-muted-foreground mb-6">
+        Order <span className="font-mono font-bold text-foreground">{order.order_number}</span>
+        {paymentSuccess ? " is confirmed." : paymentFailed ? " was placed but payment did not go through." : " has been placed."}
+      </p>
+
+      {(Number(order.paid_amount) > 0 || Number(order.due_amount) > 0) && (
+        <div className="card-elevated rounded-xl p-4 mb-4 text-sm inline-flex flex-col">
+          {Number(order.paid_amount) > 0 && <div>Paid: <b>{money(order.paid_amount)}</b>{order.transaction_id && <> · Txn <span className="font-mono">{order.transaction_id}</span></>}</div>}
+          {Number(order.due_amount) > 0 && <div>Due on delivery: <b>{money(order.due_amount)}</b></div>}
+        </div>
+      )}
 
       <div className="card-elevated rounded-2xl p-6 text-left space-y-3 mb-6">
         {items.map((it) => (
@@ -101,7 +117,12 @@ function ConfirmPage() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <Button onClick={downloadInvoice} className="gradient-primary-bg text-primary-foreground">
+        {needsPayment && (
+          <Button onClick={retry} disabled={retrying} className="gradient-primary-bg text-primary-foreground glow-primary">
+            {retrying ? "Redirecting…" : paymentFailed ? "Retry payment" : "Pay now"}
+          </Button>
+        )}
+        <Button onClick={downloadInvoice} variant="outline">
           <Download className="mr-2 h-4 w-4" /> Download invoice
         </Button>
         <Link to="/products"><Button variant="outline">Keep shopping</Button></Link>
