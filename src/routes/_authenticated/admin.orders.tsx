@@ -109,6 +109,23 @@ function AdminOrders() {
     try { await deleteFn({ data: { ids } }); toast.success("Deleted"); clearSel(); load(); }
     catch (e: any) { toast.error(e?.message ?? "Failed"); }
   };
+  const bulkShip = async () => {
+    if (!ids.length) return;
+    if (!confirm(`Send ${ids.length} order(s) to Steadfast Courier?`)) return;
+    try {
+      const r: any = await shipFn({ data: { ids } });
+      toast.success(`Steadfast: ${r.created} shipped, ${r.skipped} skipped`);
+      if (r.errors?.length) toast.error(r.errors.slice(0, 3).join(" • "));
+      clearSel(); load();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
+  const syncSteadfast = async () => {
+    try {
+      const r: any = await syncFn({});
+      toast.success(`Synced ${r.updated}/${r.checked} from Steadfast`);
+      load();
+    } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
 
   return (
     <div className="space-y-5">
