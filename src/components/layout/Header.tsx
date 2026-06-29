@@ -32,15 +32,15 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all ${
+      className={`sticky top-0 z-40 transition-all duration-500 ${
         scrolled
-          ? "bg-background/85 backdrop-blur-xl border-b border-border shadow-card"
-          : "bg-background/40 backdrop-blur-md"
+          ? "bg-background/75 backdrop-blur-2xl border-b border-border/60 shadow-soft"
+          : "bg-background/30 backdrop-blur-md border-b border-transparent"
       }`}
     >
-      <div className="container mx-auto flex items-center gap-4 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="gradient-primary-bg flex h-9 w-9 items-center justify-center rounded-lg glow-primary">
+      <div className="container mx-auto flex items-center gap-5 px-4 py-3.5">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+          <div className="gradient-primary-bg flex h-9 w-9 items-center justify-center rounded-xl glow-primary transition-transform group-hover:scale-105">
             <GraduationCap className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-display text-xl font-bold tracking-tight">
@@ -48,11 +48,18 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-          <Link to="/products" className="hover:text-primary transition-colors">Courses</Link>
-          <Link to="/products" search={{ type: "lab" } as any} className="hover:text-primary transition-colors">Labs</Link>
-          <Link to="/track" className="hover:text-primary transition-colors">Track Order</Link>
+        <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+          {[
+            { to: "/", label: "Home" },
+            { to: "/products", label: "Courses" },
+            { to: "/products", label: "Labs", search: { type: "lab" } },
+            { to: "/track", label: "Track Order" },
+          ].map((l, i) => (
+            <Link key={i} to={l.to as any} search={l.search as any} className="relative px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors group">
+              <span>{l.label}</span>
+              <span className="absolute inset-x-3 bottom-1 h-px bg-primary scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+            </Link>
+          ))}
         </nav>
 
         <form onSubmit={submitSearch} className="ml-auto hidden md:flex relative flex-1 max-w-md">
