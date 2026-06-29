@@ -315,7 +315,7 @@ function CheckoutPage() {
           {step < 2 ? (
             <Button onClick={() => setStep((s) => s + 1)} disabled={!stepValid} className="gradient-primary-bg text-primary-foreground">Continue</Button>
           ) : (
-            <Button onClick={submit} disabled={submitting} className="gradient-primary-bg text-primary-foreground glow-primary">
+            <Button onClick={submit} disabled={submitting || (autoCheckOn && fraud?.risk === "high" && !fraudAck)} className="gradient-primary-bg text-primary-foreground glow-primary">
               {submitting ? "Placing order..." : "Place order"}
             </Button>
           )}
