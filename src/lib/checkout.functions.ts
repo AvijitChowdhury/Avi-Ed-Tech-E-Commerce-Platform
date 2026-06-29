@@ -139,3 +139,13 @@ export const trackOrder = createServerFn({ method: "POST" })
     if (!order) return { found: false as const };
     return { found: true as const, order };
   });
+
+export const getOrderForConfirmation = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const sb = await adminClient();
+    const { data: order } = await sb.from("orders").select("*").eq("id", data.id).maybeSingle();
+    if (!order) return { order: null, items: [] as any[] };
+    const { data: items } = await sb.from("order_items").select("*").eq("order_id", data.id);
+    return { order, items: (items as any[]) ?? [] };
+  });
