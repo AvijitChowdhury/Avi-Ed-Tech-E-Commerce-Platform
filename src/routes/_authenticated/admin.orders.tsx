@@ -143,6 +143,7 @@ function AdminOrders() {
               {STATUSES.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Button variant="outline" onClick={syncSteadfast}><RefreshCw className="w-4 h-4 mr-1" />Sync Steadfast</Button>
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="w-4 h-4 mr-1" />Add order</Button>
