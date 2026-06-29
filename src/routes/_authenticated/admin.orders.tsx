@@ -11,6 +11,7 @@ import {
   createManualOrder,
 } from "@/lib/admin.functions";
 import { shipOrdersToSteadfast, syncSteadfastStatuses } from "@/lib/steadfast.functions";
+import { recheckOrderFraud } from "@/lib/fraud.functions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { money } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, Trash2, RotateCcw, X, Truck, RefreshCw } from "lucide-react";
+import { Plus, Trash2, RotateCcw, X, Truck, RefreshCw, ShieldAlert, ShieldCheck, Shield, ShieldQuestion } from "lucide-react";
+
+function FraudCell({ order, onRecheck }: { order: any; onRecheck: (id: string) => void }) {
+  const risk = order.fraud_risk as "low" | "medium" | "high" | "unknown" | null;
+  const map: Record<string, { Icon: any; cls: string; label: string }> = {
+    low: { Icon: ShieldCheck, cls: "text-success", label: "Low risk" },
+    medium: { Icon: Shield, cls: "text-yellow-500", label: "Medium risk" },
+    high: { Icon: ShieldAlert, cls: "text-destructive", label: "High risk" },
+    unknown: { Icon: ShieldQuestion, cls: "text-muted-foreground", label: "No history" },
+  };
+  const cfg = risk ? map[risk] : null;
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button onClick={() => onRecheck(order.id)} className="inline-flex items-center gap-1 hover:opacity-80">
+            {cfg ? (
+              <>
+                <cfg.Icon className={`w-4 h-4 ${cfg.cls}`} />
+                {risk !== "unknown" && order.fraud_total_parcel > 0 && (
+                  <span className={`text-xs font-mono ${cfg.cls}`}>{order.fraud_success}/{order.fraud_total_parcel}</span>
+                )}
+              </>
+            ) : (
+              <RefreshCw className="w-3.5 h-3.5 text-muted-foreground" />
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {cfg ? (
+            <div className="text-xs">
+              <div className="font-semibold">{cfg.label}</div>
+              {order.fraud_total_parcel > 0 && (
+                <div>{order.fraud_success} delivered · {order.fraud_cancelled} cancelled · {Math.round(Number(order.fraud_success_ratio || 0) * 100)}%</div>
+              )}
+              <div className="text-muted-foreground mt-1">Click to recheck</div>
+            </div>
+          ) : <div className="text-xs">Click to run fraud check</div>}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 export const Route = createFileRoute("/_authenticated/admin/orders")({ component: AdminOrders });
 
@@ -48,6 +92,12 @@ function AdminOrders() {
   const createFn = useServerFn(createManualOrder);
   const shipFn = useServerFn(shipOrdersToSteadfast);
   const syncFn = useServerFn(syncSteadfastStatuses);
+  const recheckFraudFn = useServerFn(recheckOrderFraud);
+
+  const recheckFraud = async (id: string) => {
+    try { const r: any = await recheckFraudFn({ data: { order_id: id } }); toast.success(`Fraud: ${r.risk}`); load(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+  };
 
   const load = () =>
     supabase
@@ -192,7 +242,7 @@ function AdminOrders() {
           <thead className="bg-muted/40">
             <tr className="text-left">
               <th className="p-3 w-10"><Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="Select all" /></th>
-              <th className="p-3">Order</th><th className="p-3">Customer</th><th className="p-3">Total</th>
+              <th className="p-3">Order</th><th className="p-3">Customer</th><th className="p-3">Fraud</th><th className="p-3">Total</th>
               <th className="p-3">Payment</th><th className="p-3">Txn / Sender</th>
               <th className="p-3">Status</th><th className="p-3">Source</th><th className="p-3">Date</th>
             </tr>
@@ -202,7 +252,8 @@ function AdminOrders() {
               <tr key={o.id} className="border-t border-border align-top">
                 <td className="p-3"><Checkbox checked={selected.has(o.id)} onCheckedChange={() => toggleOne(o.id)} aria-label={`Select ${o.order_number}`} /></td>
                 <td className="p-3 font-mono">{o.order_number}</td>
-                <td className="p-3"><div>{o.customer_name}</div><div className="text-xs text-muted-foreground">{o.customer_email}</div></td>
+                <td className="p-3"><div>{o.customer_name}</div><div className="text-xs text-muted-foreground">{o.customer_email}</div><div className="text-xs text-muted-foreground">{o.customer_phone}</div></td>
+                <td className="p-3"><FraudCell order={o} onRecheck={recheckFraud} /></td>
                 <td className="p-3 font-bold gradient-text">{money(o.total)}</td>
                 <td className="p-3">
                   <Badge variant="outline" className="capitalize">{o.payment_method}</Badge>
@@ -230,7 +281,7 @@ function AdminOrders() {
                 <td className="p-3 text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString()}</td>
               </tr>
             ))}
-            {!visible.length && <tr><td colSpan={9} className="p-8 text-center text-muted-foreground">No orders.</td></tr>}
+            {!visible.length && <tr><td colSpan={10} className="p-8 text-center text-muted-foreground">No orders.</td></tr>}
           </tbody>
         </table>
       </div>
