@@ -27,9 +27,11 @@ function CheckoutPage() {
   const { user } = useAuth();
   const placeOrderFn = useServerFn(placeOrder);
   const upsertFn = useServerFn(upsertIncompleteOrder);
+  const createChargeFn = useServerFn(createPaymentCharge);
   const [step, setStep] = useState(0);
   const [zones, setZones] = useState<Zone[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE" | "PARTIAL">("COD");
 
   const [form, setForm] = useState({
     customer_name: "",
