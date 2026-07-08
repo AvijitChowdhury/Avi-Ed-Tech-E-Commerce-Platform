@@ -140,17 +140,18 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
         <script dangerouslySetInnerHTML={{ __html: fbPixel }} />
+      </head>
+      <body>
         <noscript
           dangerouslySetInnerHTML={{
             __html: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1" />`,
           }}
         />
-      </head>
-      <body>
         {children}
         <Scripts />
       </body>
     </html>
+
   );
 }
 

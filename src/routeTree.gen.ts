@@ -14,12 +14,12 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as PublicTrackRouteImport } from './routes/_public.track'
-import { Route as PublicProductsRouteImport } from './routes/_public.products'
 import { Route as PublicCheckoutRouteImport } from './routes/_public.checkout'
 import { Route as PublicCartRouteImport } from './routes/_public.cart'
 import { Route as PublicAuthRouteImport } from './routes/_public.auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as PublicProductsIndexRouteImport } from './routes/_public.products.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account.index'
 import { Route as PublicProductsSlugRouteImport } from './routes/_public.products.$slug'
@@ -63,11 +63,6 @@ const PublicTrackRoute = PublicTrackRouteImport.update({
   path: '/track',
   getParentRoute: () => PublicRoute,
 } as any)
-const PublicProductsRoute = PublicProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => PublicRoute,
-} as any)
 const PublicCheckoutRoute = PublicCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
@@ -93,6 +88,11 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const PublicProductsIndexRoute = PublicProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => PublicRoute,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -105,9 +105,9 @@ const AuthenticatedAccountIndexRoute =
     getParentRoute: () => AuthenticatedAccountRoute,
   } as any)
 const PublicProductsSlugRoute = PublicProductsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => PublicProductsRoute,
+  id: '/products/$slug',
+  path: '/products/$slug',
+  getParentRoute: () => PublicRoute,
 } as any)
 const PublicOrderConfirmationIdRoute =
   PublicOrderConfirmationIdRouteImport.update({
@@ -212,7 +212,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof PublicAuthRoute
   '/cart': typeof PublicCartRoute
   '/checkout': typeof PublicCheckoutRoute
-  '/products': typeof PublicProductsRouteWithChildren
   '/track': typeof PublicTrackRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
@@ -231,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/products/': typeof PublicProductsIndexRoute
   '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
@@ -240,7 +240,6 @@ export interface FileRoutesByTo {
   '/auth': typeof PublicAuthRoute
   '/cart': typeof PublicCartRoute
   '/checkout': typeof PublicCheckoutRoute
-  '/products': typeof PublicProductsRouteWithChildren
   '/track': typeof PublicTrackRoute
   '/account/addresses': typeof AuthenticatedAccountAddressesRoute
   '/account/orders': typeof AuthenticatedAccountOrdersRoute
@@ -259,6 +258,7 @@ export interface FileRoutesByTo {
   '/products/$slug': typeof PublicProductsSlugRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/products': typeof PublicProductsIndexRoute
   '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
@@ -272,7 +272,6 @@ export interface FileRoutesById {
   '/_public/auth': typeof PublicAuthRoute
   '/_public/cart': typeof PublicCartRoute
   '/_public/checkout': typeof PublicCheckoutRoute
-  '/_public/products': typeof PublicProductsRouteWithChildren
   '/_public/track': typeof PublicTrackRoute
   '/_public/': typeof PublicIndexRoute
   '/_authenticated/account/addresses': typeof AuthenticatedAccountAddressesRoute
@@ -292,6 +291,7 @@ export interface FileRoutesById {
   '/_public/products/$slug': typeof PublicProductsSlugRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_public/products/': typeof PublicProductsIndexRoute
   '/api/public/hooks/steadfast-sync': typeof ApiPublicHooksSteadfastSyncRoute
   '/api/public/payment/callback': typeof ApiPublicPaymentCallbackRoute
 }
@@ -305,7 +305,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
-    | '/products'
     | '/track'
     | '/account/addresses'
     | '/account/orders'
@@ -324,6 +323,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account/'
     | '/admin/'
+    | '/products/'
     | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   fileRoutesByTo: FileRoutesByTo
@@ -333,7 +333,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/cart'
     | '/checkout'
-    | '/products'
     | '/track'
     | '/account/addresses'
     | '/account/orders'
@@ -352,6 +351,7 @@ export interface FileRouteTypes {
     | '/products/$slug'
     | '/account'
     | '/admin'
+    | '/products'
     | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   id:
@@ -364,7 +364,6 @@ export interface FileRouteTypes {
     | '/_public/auth'
     | '/_public/cart'
     | '/_public/checkout'
-    | '/_public/products'
     | '/_public/track'
     | '/_public/'
     | '/_authenticated/account/addresses'
@@ -384,6 +383,7 @@ export interface FileRouteTypes {
     | '/_public/products/$slug'
     | '/_authenticated/account/'
     | '/_authenticated/admin/'
+    | '/_public/products/'
     | '/api/public/hooks/steadfast-sync'
     | '/api/public/payment/callback'
   fileRoutesById: FileRoutesById
@@ -433,13 +433,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicTrackRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_public/products': {
-      id: '/_public/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof PublicProductsRouteImport
-      parentRoute: typeof PublicRoute
-    }
     '/_public/checkout': {
       id: '/_public/checkout'
       path: '/checkout'
@@ -475,6 +468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_public/products/': {
+      id: '/_public/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof PublicProductsIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -491,10 +491,10 @@ declare module '@tanstack/react-router' {
     }
     '/_public/products/$slug': {
       id: '/_public/products/$slug'
-      path: '/$slug'
+      path: '/products/$slug'
       fullPath: '/products/$slug'
       preLoaderRoute: typeof PublicProductsSlugRouteImport
-      parentRoute: typeof PublicProductsRoute
+      parentRoute: typeof PublicRoute
     }
     '/_public/order-confirmation/$id': {
       id: '/_public/order-confirmation/$id'
@@ -670,38 +670,28 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface PublicProductsRouteChildren {
-  PublicProductsSlugRoute: typeof PublicProductsSlugRoute
-}
-
-const PublicProductsRouteChildren: PublicProductsRouteChildren = {
-  PublicProductsSlugRoute: PublicProductsSlugRoute,
-}
-
-const PublicProductsRouteWithChildren = PublicProductsRoute._addFileChildren(
-  PublicProductsRouteChildren,
-)
-
 interface PublicRouteChildren {
   PublicAuthRoute: typeof PublicAuthRoute
   PublicCartRoute: typeof PublicCartRoute
   PublicCheckoutRoute: typeof PublicCheckoutRoute
-  PublicProductsRoute: typeof PublicProductsRouteWithChildren
   PublicTrackRoute: typeof PublicTrackRoute
   PublicIndexRoute: typeof PublicIndexRoute
   PublicCategoriesSlugRoute: typeof PublicCategoriesSlugRoute
   PublicOrderConfirmationIdRoute: typeof PublicOrderConfirmationIdRoute
+  PublicProductsSlugRoute: typeof PublicProductsSlugRoute
+  PublicProductsIndexRoute: typeof PublicProductsIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicAuthRoute: PublicAuthRoute,
   PublicCartRoute: PublicCartRoute,
   PublicCheckoutRoute: PublicCheckoutRoute,
-  PublicProductsRoute: PublicProductsRouteWithChildren,
   PublicTrackRoute: PublicTrackRoute,
   PublicIndexRoute: PublicIndexRoute,
   PublicCategoriesSlugRoute: PublicCategoriesSlugRoute,
   PublicOrderConfirmationIdRoute: PublicOrderConfirmationIdRoute,
+  PublicProductsSlugRoute: PublicProductsSlugRoute,
+  PublicProductsIndexRoute: PublicProductsIndexRoute,
 }
 
 const PublicRouteWithChildren =
