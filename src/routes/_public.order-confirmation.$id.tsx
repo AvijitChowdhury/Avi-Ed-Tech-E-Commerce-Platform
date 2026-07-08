@@ -13,7 +13,15 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_public/order-confirmation/$id")({
   component: ConfirmPage,
   validateSearch: (s: Record<string, unknown>) => ({ payment: (s.payment as string | undefined) ?? undefined }),
+  head: () => ({
+    meta: [
+      { title: "Order confirmed — AviEdTech" },
+      { name: "description", content: "Your AviEdTech order confirmation and next steps." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
 });
+
 
 function ConfirmPage() {
   const { id } = Route.useParams();
