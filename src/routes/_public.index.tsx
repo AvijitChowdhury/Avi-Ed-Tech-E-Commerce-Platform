@@ -119,11 +119,15 @@ function HomePage() {
                   <div className="absolute -inset-4 gradient-primary-bg opacity-30 blur-3xl rounded-[2.5rem]" />
                   <img
                     src={hero.image_url}
-                    alt={hero.title ?? ""}
+                    alt={hero.title ?? "AviEdTech hero"}
                     width={1600}
                     height={900}
+                    // @ts-expect-error fetchpriority is valid HTML but not in older React types
+                    fetchpriority="high"
+                    decoding="async"
                     className="relative rounded-[2rem] shadow-elegant w-full h-auto object-cover border border-border/60"
                   />
+
                   {/* Floating accents */}
                   <div className="absolute -top-4 -right-4 card-glass rounded-2xl px-4 py-3 flex items-center gap-2 shadow-soft">
                     <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
