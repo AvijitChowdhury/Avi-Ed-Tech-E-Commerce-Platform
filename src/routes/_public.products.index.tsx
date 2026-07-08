@@ -14,7 +14,7 @@ const search = z.object({
   cat: z.string().optional(),
 });
 
-export const Route = createFileRoute("/_public/products")({
+export const Route = createFileRoute("/_public/products/")({
   validateSearch: search,
   component: ProductsPage,
   head: () => ({
