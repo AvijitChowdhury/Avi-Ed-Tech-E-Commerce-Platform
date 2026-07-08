@@ -7,7 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { money } from "@/lib/format";
 
-export const Route = createFileRoute("/_public/track")({ component: TrackPage });
+export const Route = createFileRoute("/_public/track")({
+  component: TrackPage,
+  head: () => ({
+    meta: [
+      { title: "Track your order — AviEdTech" },
+      { name: "description", content: "Enter your AviEdTech order number and email to see the current status and delivery updates." },
+      { property: "og:title", content: "Track your order — AviEdTech" },
+      { property: "og:description", content: "Check the status of your AviEdTech course or lab order." },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/track" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/track" }],
+  }),
+});
+
 
 const STEPS = ["pending", "processing", "shipped", "delivered"];
 
