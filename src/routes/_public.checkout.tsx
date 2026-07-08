@@ -17,7 +17,7 @@ import { getSessionId } from "@/lib/session";
 import { Check, ShieldAlert, ShieldCheck, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { fbTrack } from "@/lib/fbpixel";
-import { checkFraud, saveOrderFraud } from "@/lib/fraud.functions";
+import { checkFraud, saveOrderFraud, getFraudPublicConfig } from "@/lib/fraud.functions";
 import { getCached, setCached, normalizePhone } from "@/lib/fraudCache";
 
 export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
