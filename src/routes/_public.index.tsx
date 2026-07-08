@@ -10,7 +10,16 @@ import {
   GraduationCap, Code2, Briefcase,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_public/")({ component: HomePage });
+export const Route = createFileRoute("/_public/")({
+  component: HomePage,
+  head: () => ({
+    meta: [
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/" }],
+  }),
+});
+
 
 type Banner = { id: string; type: string; title: string | null; subtitle: string | null; cta_label: string | null; cta_link: string | null; image_url: string | null; badge: string | null };
 type Category = { id: string; slug: string; name: string; image_url: string | null };
