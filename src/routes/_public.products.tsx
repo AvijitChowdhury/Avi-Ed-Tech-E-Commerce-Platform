@@ -17,7 +17,19 @@ const search = z.object({
 export const Route = createFileRoute("/_public/products")({
   validateSearch: search,
   component: ProductsPage,
+  head: () => ({
+    meta: [
+      { title: "All courses & labs — AviEdTech" },
+      { name: "description", content: "Browse the full AviEdTech catalog: recorded courses and hands-on labs in cybersecurity, machine learning, and web development. Filter by type, category, price, and rating." },
+      { property: "og:title", content: "All courses & labs — AviEdTech" },
+      { property: "og:description", content: "Browse the full AviEdTech catalog: recorded courses and hands-on labs. Filter by type, category, price, and rating." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/products" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/products" }],
+  }),
 });
+
 
 type Category = { id: string; slug: string; name: string };
 
