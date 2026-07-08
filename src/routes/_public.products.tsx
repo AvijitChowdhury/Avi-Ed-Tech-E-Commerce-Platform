@@ -17,7 +17,19 @@ const search = z.object({
 export const Route = createFileRoute("/_public/products")({
   validateSearch: search,
   component: ProductsPage,
+  head: () => ({
+    meta: [
+      { title: "All courses & labs — AviEdTech" },
+      { name: "description", content: "Browse the full AviEdTech catalog: recorded courses and hands-on labs in cybersecurity, machine learning, and web development. Filter by type, category, price, and rating." },
+      { property: "og:title", content: "All courses & labs — AviEdTech" },
+      { property: "og:description", content: "Browse the full AviEdTech catalog: recorded courses and hands-on labs. Filter by type, category, price, and rating." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/products" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/products" }],
+  }),
 });
+
 
 type Category = { id: string; slug: string; name: string };
 
@@ -56,7 +68,7 @@ function ProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <h1 className="font-display text-3xl font-bold mb-6">All courses & labs</h1>
+      <h1 className="font-display text-3xl font-bold mb-6">All AviEdTech courses &amp; hands-on labs</h1>
       <div className="grid md:grid-cols-[260px_1fr] gap-8">
         <aside className="space-y-6 card-elevated rounded-2xl p-5 h-fit sticky top-24">
           <div>

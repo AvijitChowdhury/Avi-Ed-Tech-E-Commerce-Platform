@@ -9,7 +9,20 @@ import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { GraduationCap } from "lucide-react";
 
-export const Route = createFileRoute("/_public/auth")({ component: AuthPage });
+export const Route = createFileRoute("/_public/auth")({
+  component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Sign in — AviEdTech" },
+      { name: "description", content: "Sign in to your AviEdTech account or create a new one to access your courses and labs." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Sign in — AviEdTech" },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/auth" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/auth" }],
+  }),
+});
+
 
 function AuthPage() {
   const navigate = useNavigate();

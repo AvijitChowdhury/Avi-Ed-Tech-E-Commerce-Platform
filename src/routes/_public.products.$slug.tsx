@@ -10,7 +10,53 @@ import ProductCard, { type ProductLike } from "@/components/products/ProductCard
 
 export const Route = createFileRoute("/_public/products/$slug")({
   component: ProductDetail,
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("products")
+      .select("title, short_description, cover_image, price, slug, type")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { seo: data };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://avi-ed-tech.lovable.app/products/${params.slug}`;
+    const p = loaderData?.seo;
+    const title = p?.title ? `${p.title} — AviEdTech` : "Course — AviEdTech";
+    const desc = (p?.short_description ?? `Enroll in ${p?.title ?? "this program"} on AviEdTech — recorded lessons and hands-on labs with lifetime access.`).slice(0, 160);
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+      { property: "og:type", content: "product" },
+      { property: "og:url", content: url },
+    ];
+    if (p?.cover_image) {
+      meta.push({ property: "og:image", content: p.cover_image });
+      meta.push({ name: "twitter:image", content: p.cover_image });
+    }
+    const scripts = p ? [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: p.title,
+        description: p.short_description ?? undefined,
+        image: p.cover_image ?? undefined,
+        url,
+        offers: {
+          "@type": "Offer",
+          price: Number(p.price),
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          url,
+        },
+      }),
+    }] : undefined;
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
 });
+
 
 function ProductDetail() {
   const { slug } = Route.useParams();

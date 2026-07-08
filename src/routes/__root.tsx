@@ -84,9 +84,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AviEdTech — Recorded courses & hands-on labs" },
       { name: "twitter:description", content: "Master cybersecurity, ML, and web dev with recorded courses and hands-on labs from industry experts. Lifetime access." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
     ],
+
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -96,7 +95,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "AviEdTech",
+          url: "https://avi-ed-tech.lovable.app",
+          logo: "https://avi-ed-tech.lovable.app/favicon.ico",
+          description: "Recorded courses and hands-on labs in cybersecurity, machine learning, and web development.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "AviEdTech",
+          url: "https://avi-ed-tech.lovable.app",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://avi-ed-tech.lovable.app/products?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+    ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

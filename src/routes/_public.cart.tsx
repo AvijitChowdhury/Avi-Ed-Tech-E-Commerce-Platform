@@ -5,7 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { money } from "@/lib/format";
 
-export const Route = createFileRoute("/_public/cart")({ component: CartPage });
+export const Route = createFileRoute("/_public/cart")({
+  component: CartPage,
+  head: () => ({
+    meta: [
+      { title: "Your cart — AviEdTech" },
+      { name: "description", content: "Review the courses and labs in your AviEdTech cart before checkout." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Your cart — AviEdTech" },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/cart" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/cart" }],
+  }),
+});
+
 
 function CartPage() {
   const { items, update, remove, subtotal } = useCart();

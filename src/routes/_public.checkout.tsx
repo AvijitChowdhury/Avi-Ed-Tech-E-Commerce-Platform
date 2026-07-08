@@ -20,7 +20,20 @@ import { fbTrack } from "@/lib/fbpixel";
 import { checkFraud, saveOrderFraud, getFraudPublicConfig } from "@/lib/fraud.functions";
 import { getCached, setCached, normalizePhone } from "@/lib/fraudCache";
 
-export const Route = createFileRoute("/_public/checkout")({ component: CheckoutPage });
+export const Route = createFileRoute("/_public/checkout")({
+  component: CheckoutPage,
+  head: () => ({
+    meta: [
+      { title: "Checkout — AviEdTech" },
+      { name: "description", content: "Complete your AviEdTech order — enter shipping details and choose a payment method." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Checkout — AviEdTech" },
+      { property: "og:url", content: "https://avi-ed-tech.lovable.app/checkout" },
+    ],
+    links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/checkout" }],
+  }),
+});
+
 
 type Zone = { id: string; name: string; price: number };
 

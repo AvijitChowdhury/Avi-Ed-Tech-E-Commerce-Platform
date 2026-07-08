@@ -3,7 +3,45 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard, { type ProductLike } from "@/components/products/ProductCard";
 
-export const Route = createFileRoute("/_public/categories/$slug")({ component: CategoryPage });
+export const Route = createFileRoute("/_public/categories/$slug")({
+  component: CategoryPage,
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("categories")
+      .select("name, description, slug")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { seo: data };
+  },
+  head: ({ params, loaderData }) => {
+    const url = `https://avi-ed-tech.lovable.app/categories/${params.slug}`;
+    const c = loaderData?.seo;
+    const title = c?.name ? `${c.name} courses & labs — AviEdTech` : "Category — AviEdTech";
+    const desc = (c?.description ?? `Explore ${c?.name ?? "this category"} courses and hands-on labs on AviEdTech.`).slice(0, 160);
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: c ? [{
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${c.name} courses & labs`,
+          description: c.description ?? desc,
+          url,
+        }),
+      }] : undefined,
+    };
+  },
+});
+
 
 function CategoryPage() {
   const { slug } = Route.useParams();
