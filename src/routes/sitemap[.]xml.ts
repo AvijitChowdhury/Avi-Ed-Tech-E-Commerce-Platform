@@ -24,9 +24,11 @@ export const Route = createFileRoute("/sitemap.xml")({
           "/checkout",
           "/track",
           "/auth",
+          "/blog/top-hands-on-tech-learning-platforms",
           ...(cats ?? []).map((c) => `/categories/${c.slug}`),
           ...(products ?? []).map((p) => `/products/${p.slug}`),
         ];
+
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${paths.map((p) => `  <url><loc>${BASE_URL}${p}</loc></url>`).join("\n")}

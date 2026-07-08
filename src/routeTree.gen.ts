@@ -25,6 +25,7 @@ import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authent
 import { Route as PublicProductsSlugRouteImport } from './routes/_public.products.$slug'
 import { Route as PublicOrderConfirmationIdRouteImport } from './routes/_public.order-confirmation.$id'
 import { Route as PublicCategoriesSlugRouteImport } from './routes/_public.categories.$slug'
+import { Route as PublicBlogTopHandsOnTechLearningPlatformsRouteImport } from './routes/_public.blog.top-hands-on-tech-learning-platforms'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
@@ -120,6 +121,12 @@ const PublicCategoriesSlugRoute = PublicCategoriesSlugRouteImport.update({
   path: '/categories/$slug',
   getParentRoute: () => PublicRoute,
 } as any)
+const PublicBlogTopHandsOnTechLearningPlatformsRoute =
+  PublicBlogTopHandsOnTechLearningPlatformsRouteImport.update({
+    id: '/blog/top-hands-on-tech-learning-platforms',
+    path: '/blog/top-hands-on-tech-learning-platforms',
+    getParentRoute: () => PublicRoute,
+  } as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/blog/top-hands-on-tech-learning-platforms': typeof PublicBlogTopHandsOnTechLearningPlatformsRoute
   '/categories/$slug': typeof PublicCategoriesSlugRoute
   '/order-confirmation/$id': typeof PublicOrderConfirmationIdRoute
   '/products/$slug': typeof PublicProductsSlugRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/blog/top-hands-on-tech-learning-platforms': typeof PublicBlogTopHandsOnTechLearningPlatformsRoute
   '/categories/$slug': typeof PublicCategoriesSlugRoute
   '/order-confirmation/$id': typeof PublicOrderConfirmationIdRoute
   '/products/$slug': typeof PublicProductsSlugRoute
@@ -286,6 +295,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_public/blog/top-hands-on-tech-learning-platforms': typeof PublicBlogTopHandsOnTechLearningPlatformsRoute
   '/_public/categories/$slug': typeof PublicCategoriesSlugRoute
   '/_public/order-confirmation/$id': typeof PublicOrderConfirmationIdRoute
   '/_public/products/$slug': typeof PublicProductsSlugRoute
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
+    | '/blog/top-hands-on-tech-learning-platforms'
     | '/categories/$slug'
     | '/order-confirmation/$id'
     | '/products/$slug'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/admin/orders'
     | '/admin/products'
     | '/admin/settings'
+    | '/blog/top-hands-on-tech-learning-platforms'
     | '/categories/$slug'
     | '/order-confirmation/$id'
     | '/products/$slug'
@@ -378,6 +390,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/settings'
+    | '/_public/blog/top-hands-on-tech-learning-platforms'
     | '/_public/categories/$slug'
     | '/_public/order-confirmation/$id'
     | '/_public/products/$slug'
@@ -508,6 +521,13 @@ declare module '@tanstack/react-router' {
       path: '/categories/$slug'
       fullPath: '/categories/$slug'
       preLoaderRoute: typeof PublicCategoriesSlugRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/blog/top-hands-on-tech-learning-platforms': {
+      id: '/_public/blog/top-hands-on-tech-learning-platforms'
+      path: '/blog/top-hands-on-tech-learning-platforms'
+      fullPath: '/blog/top-hands-on-tech-learning-platforms'
+      preLoaderRoute: typeof PublicBlogTopHandsOnTechLearningPlatformsRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_authenticated/admin/settings': {
@@ -676,6 +696,7 @@ interface PublicRouteChildren {
   PublicCheckoutRoute: typeof PublicCheckoutRoute
   PublicTrackRoute: typeof PublicTrackRoute
   PublicIndexRoute: typeof PublicIndexRoute
+  PublicBlogTopHandsOnTechLearningPlatformsRoute: typeof PublicBlogTopHandsOnTechLearningPlatformsRoute
   PublicCategoriesSlugRoute: typeof PublicCategoriesSlugRoute
   PublicOrderConfirmationIdRoute: typeof PublicOrderConfirmationIdRoute
   PublicProductsSlugRoute: typeof PublicProductsSlugRoute
@@ -688,6 +709,8 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicCheckoutRoute: PublicCheckoutRoute,
   PublicTrackRoute: PublicTrackRoute,
   PublicIndexRoute: PublicIndexRoute,
+  PublicBlogTopHandsOnTechLearningPlatformsRoute:
+    PublicBlogTopHandsOnTechLearningPlatformsRoute,
   PublicCategoriesSlugRoute: PublicCategoriesSlugRoute,
   PublicOrderConfirmationIdRoute: PublicOrderConfirmationIdRoute,
   PublicProductsSlugRoute: PublicProductsSlugRoute,
@@ -707,3 +730,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
