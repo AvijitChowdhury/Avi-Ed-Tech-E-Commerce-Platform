@@ -84,9 +84,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "AviEdTech — Recorded courses & hands-on labs" },
       { name: "twitter:description", content: "Master cybersecurity, ML, and web dev with recorded courses and hands-on labs from industry experts. Lifetime access." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
     ],
+
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
