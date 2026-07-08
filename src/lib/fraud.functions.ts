@@ -159,3 +159,16 @@ export const testBDCourierConnection = createServerFn({ method: "POST" })
     const raw = await callBDCourier(normalize(data.phone));
     return { ok: true, summary: summarize(raw) };
   });
+
+export const getFraudPublicConfig = createServerFn({ method: "GET" })
+  .handler(async (): Promise<{ auto_check: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("app_settings")
+      .select("value")
+      .eq("key", "fraud")
+      .maybeSingle();
+    const v: any = data?.value ?? {};
+    return { auto_check: v.auto_check !== false };
+  });
+
