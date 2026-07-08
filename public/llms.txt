@@ -1,0 +1,15 @@
+# AviEdTech
+
+> Recorded courses and hands-on labs in cybersecurity, machine learning, and web development, taught by industry experts. Lifetime access, real cloud environments, career-focused outcomes.
+
+AviEdTech sells recorded tech courses and live hands-on labs. Learners get lifetime access, quarterly content updates, and certificates of completion.
+
+## Pages
+
+- [Home](/): Overview of AviEdTech's courses, labs, categories, and featured programs.
+- [All courses & labs](/products): Full catalog with filters for type, category, price, and rating.
+- [Track order](/track): Look up an existing order by order number and email.
+
+## Optional
+
+- [Sign in](/auth): Sign in or create an AviEdTech account.
