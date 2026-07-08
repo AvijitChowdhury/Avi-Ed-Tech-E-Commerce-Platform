@@ -15,10 +15,13 @@ export const Route = createFileRoute("/_public/")({
   head: () => ({
     meta: [
       { property: "og:url", content: "https://avi-ed-tech.lovable.app/" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/7f106302-74e5-4164-a69d-54a9afeb97df" },
     ],
     links: [{ rel: "canonical", href: "https://avi-ed-tech.lovable.app/" }],
   }),
 });
+
 
 
 type Banner = { id: string; type: string; title: string | null; subtitle: string | null; cta_label: string | null; cta_link: string | null; image_url: string | null; badge: string | null };
