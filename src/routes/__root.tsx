@@ -96,7 +96,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "AviEdTech",
+          url: "https://avi-ed-tech.lovable.app",
+          logo: "https://avi-ed-tech.lovable.app/favicon.ico",
+          description: "Recorded courses and hands-on labs in cybersecurity, machine learning, and web development.",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "AviEdTech",
+          url: "https://avi-ed-tech.lovable.app",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://avi-ed-tech.lovable.app/products?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+    ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
