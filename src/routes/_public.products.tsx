@@ -68,7 +68,7 @@ function ProductsPage() {
 
   return (
     <div className="container mx-auto px-4 py-10">
-      <h1 className="font-display text-3xl font-bold mb-6">All courses & labs</h1>
+      <h1 className="font-display text-3xl font-bold mb-6">All AviEdTech courses &amp; hands-on labs</h1>
       <div className="grid md:grid-cols-[260px_1fr] gap-8">
         <aside className="space-y-6 card-elevated rounded-2xl p-5 h-fit sticky top-24">
           <div>
