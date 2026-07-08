@@ -42,10 +42,11 @@ function CheckoutPage() {
   const [fraudAck, setFraudAck] = useState(false);
   const [autoCheckOn, setAutoCheckOn] = useState(true);
 
+  const fraudConfigFn = useServerFn(getFraudPublicConfig);
   useEffect(() => {
-    supabase.from("app_settings").select("value").eq("key", "fraud").maybeSingle()
-      .then(({ data }) => { if (data?.value && (data.value as any).auto_check === false) setAutoCheckOn(false); });
-  }, []);
+    fraudConfigFn().then((cfg) => { if (cfg && cfg.auto_check === false) setAutoCheckOn(false); }).catch(() => {});
+  }, [fraudConfigFn]);
+
 
   const runFraudCheck = async (phone: string) => {
     const p = normalizePhone(phone);
