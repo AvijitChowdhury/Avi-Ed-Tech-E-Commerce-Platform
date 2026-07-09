@@ -74,7 +74,62 @@ The stack is production-capable end to end:
 
 ## 🏛 Software architecture
 
-<lov-artifact url="/__l5e/documents/Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+```mermaid
+graph TB
+    subgraph Client["🖥️  Browser · React 19 + TanStack Start"]
+        UI[UI Components<br/>shadcn/ui · Tailwind v4]
+        Router[File-based Router<br/>src/routes/]
+        Query[TanStack Query<br/>cache + Suspense]
+        Store[Zustand Stores<br/>auth · cart]
+    end
+
+    subgraph Edge["⚡ Cloudflare Workers · workerd"]
+        SSR[SSR Renderer<br/>streaming HTML]
+        SFN[Server Functions<br/>createServerFn RPC]
+        API[Public API Routes<br/>/api/public/*<br/>webhooks · callbacks]
+        MW[requireSupabaseAuth<br/>middleware]
+    end
+
+    subgraph Data["🗄️  Supabase Postgres"]
+        Tables[(products · orders<br/>order_items · profiles<br/>user_roles · app_settings<br/>chat_sessions)]
+        RLS[Row Level Security<br/>+ has_role SECURITY DEFINER]
+        Storage[Storage Buckets<br/>product · hero images]
+        Auth[Supabase Auth<br/>email + session]
+    end
+
+    subgraph External["🌐 External Services"]
+        Pay[Udokkta<br/>Payment Gateway]
+        Ship[Steadfast<br/>Courier API]
+        FB[Facebook Pixel<br/>+ Conversions API]
+    end
+
+    UI --> Router
+    Router --> Query
+    Query -->|ensureQueryData| SFN
+    Store -.session.-> MW
+    Router -->|SSR| SSR
+    SSR --> SFN
+    SFN --> MW
+    MW --> RLS
+    RLS --> Tables
+    SFN --> Storage
+    UI -->|auth flows| Auth
+    API --> Tables
+    SFN -->|redirect| Pay
+    Pay -->|callback| API
+    API --> Ship
+    SFN --> FB
+
+    classDef client fill:#3B82F6,stroke:#1E3A8A,stroke-width:2px,color:#fff
+    classDef edge fill:#F59E0B,stroke:#B45309,stroke-width:2px,color:#111
+    classDef data fill:#10B981,stroke:#065F46,stroke-width:2px,color:#fff
+    classDef external fill:#EF4444,stroke:#7F1D1D,stroke-width:2px,color:#fff
+
+    class UI,Router,Query,Store client
+    class SSR,SFN,API,MW edge
+    class Tables,RLS,Storage,Auth data
+    class Pay,Ship,FB external
+```
 
 **Key patterns**
 
@@ -97,7 +152,63 @@ The stack is production-capable end to end:
 
 ## 🧪 Testing architecture
 
-<lov-artifact url="/__l5e/documents/Testing_Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+```mermaid
+graph LR
+    subgraph Runner["🧪 Test Runner"]
+        Pytest[pytest<br/>+ pytest-playwright]
+        Conf[pytest.ini<br/>--alluredir]
+    end
+
+    subgraph Browser["🌐 Headless Chromium"]
+        PW[Playwright Python]
+        Ctx[Browser Context<br/>1280 × 1800]
+        Sess[Session Restore<br/>Supabase cookies<br/>+ localStorage]
+    end
+
+    subgraph SUT["🚀 System Under Test"]
+        Dev[Vite Dev Server<br/>localhost:8080]
+        App[TanStack Start<br/>SSR + Client]
+        DB[(Supabase Postgres<br/>with RLS)]
+    end
+
+    subgraph Suites["📋 25 Scenarios · 4 Epics"]
+        E1[Public Site<br/>home · catalog · categories<br/>sitemap · robots · llms.txt]
+        E2[Shopping<br/>add-to-cart · search<br/>filter · product detail]
+        E3[Track Order<br/>empty · not-found]
+        E4[Account + Admin<br/>session-restored flows]
+    end
+
+    subgraph Report["📊 Reporting"]
+        Results[allure-results/<br/>JSON + screenshots]
+        HTML[allure-report/<br/>HTML dashboard]
+        Docs[docs/screenshots/<br/>README assets]
+    end
+
+    Pytest --> PW
+    Conf --> Pytest
+    PW --> Ctx
+    Ctx --> Sess
+    Sess -.bearer.-> App
+    Ctx -->|navigate + assert| Dev
+    Dev --> App
+    App --> DB
+    Suites --> Pytest
+    PW -->|screenshot per test| Results
+    Results -->|allure generate| HTML
+    Results -->|copy| Docs
+
+    classDef runner fill:#8B5CF6,stroke:#4C1D95,stroke-width:2px,color:#fff
+    classDef browser fill:#06B6D4,stroke:#0E7490,stroke-width:2px,color:#fff
+    classDef sut fill:#10B981,stroke:#065F46,stroke-width:2px,color:#fff
+    classDef suite fill:#F59E0B,stroke:#B45309,stroke-width:2px,color:#111
+    classDef report fill:#EC4899,stroke:#831843,stroke-width:2px,color:#fff
+
+    class Pytest,Conf runner
+    class PW,Ctx,Sess browser
+    class Dev,App,DB sut
+    class E1,E2,E3,E4 suite
+    class Results,HTML,Docs report
+```
 
 The suite lives in [`tests/e2e/`](tests/e2e) and is driven by
 `pytest-playwright` + `allure-pytest`. It boots headless Chromium against
