@@ -66,6 +66,8 @@ end:
 
 ## Architecture
 
+<lov-artifact url="/__l5e/documents/Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+
 ```text
                 ┌─────────────────────────────────────────┐
    Browser  ─▶  │  TanStack Start (React 19, Vite 7)      │
