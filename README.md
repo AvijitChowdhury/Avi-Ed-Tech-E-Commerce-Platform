@@ -74,7 +74,62 @@ The stack is production-capable end to end:
 
 ## 🏛 Software architecture
 
-<lov-artifact url="/__l5e/documents/Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+```mermaid
+graph TB
+    subgraph Client["🖥️  Browser · React 19 + TanStack Start"]
+        UI[UI Components<br/>shadcn/ui · Tailwind v4]
+        Router[File-based Router<br/>src/routes/]
+        Query[TanStack Query<br/>cache + Suspense]
+        Store[Zustand Stores<br/>auth · cart]
+    end
+
+    subgraph Edge["⚡ Cloudflare Workers · workerd"]
+        SSR[SSR Renderer<br/>streaming HTML]
+        SFN[Server Functions<br/>createServerFn RPC]
+        API[Public API Routes<br/>/api/public/*<br/>webhooks · callbacks]
+        MW[requireSupabaseAuth<br/>middleware]
+    end
+
+    subgraph Data["🗄️  Supabase Postgres"]
+        Tables[(products · orders<br/>order_items · profiles<br/>user_roles · app_settings<br/>chat_sessions)]
+        RLS[Row Level Security<br/>+ has_role SECURITY DEFINER]
+        Storage[Storage Buckets<br/>product · hero images]
+        Auth[Supabase Auth<br/>email + session]
+    end
+
+    subgraph External["🌐 External Services"]
+        Pay[Udokkta<br/>Payment Gateway]
+        Ship[Steadfast<br/>Courier API]
+        FB[Facebook Pixel<br/>+ Conversions API]
+    end
+
+    UI --> Router
+    Router --> Query
+    Query -->|ensureQueryData| SFN
+    Store -.session.-> MW
+    Router -->|SSR| SSR
+    SSR --> SFN
+    SFN --> MW
+    MW --> RLS
+    RLS --> Tables
+    SFN --> Storage
+    UI -->|auth flows| Auth
+    API --> Tables
+    SFN -->|redirect| Pay
+    Pay -->|callback| API
+    API --> Ship
+    SFN --> FB
+
+    classDef client fill:#3B82F6,stroke:#1E3A8A,stroke-width:2px,color:#fff
+    classDef edge fill:#F59E0B,stroke:#B45309,stroke-width:2px,color:#111
+    classDef data fill:#10B981,stroke:#065F46,stroke-width:2px,color:#fff
+    classDef external fill:#EF4444,stroke:#7F1D1D,stroke-width:2px,color:#fff
+
+    class UI,Router,Query,Store client
+    class SSR,SFN,API,MW edge
+    class Tables,RLS,Storage,Auth data
+    class Pay,Ship,FB external
+```
 
 **Key patterns**
 
