@@ -66,6 +66,8 @@ end:
 
 ## Architecture
 
+<lov-artifact url="/__l5e/documents/Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+
 ```text
                 ┌─────────────────────────────────────────┐
    Browser  ─▶  │  TanStack Start (React 19, Vite 7)      │
@@ -152,6 +154,11 @@ The suite lives in [`tests/e2e/`](tests/e2e) and is driven by
 against the running dev server (`http://localhost:8080`), restores the
 managed Supabase session from environment variables where needed, and
 attaches a full‑page screenshot to every scenario.
+
+### Testing architecture
+
+<lov-artifact url="/__l5e/documents/Testing_Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+
 
 ### Coverage
 
