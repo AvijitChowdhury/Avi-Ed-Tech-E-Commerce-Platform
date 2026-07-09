@@ -155,6 +155,11 @@ against the running dev server (`http://localhost:8080`), restores the
 managed Supabase session from environment variables where needed, and
 attaches a full‑page screenshot to every scenario.
 
+### Testing architecture
+
+<lov-artifact url="/__l5e/documents/Testing_Architecture_Diagram.mmd" mime_type="text/vnd.mermaid"></lov-artifact>
+
+
 ### Coverage
 
 25 scenarios across 4 Allure epics:
